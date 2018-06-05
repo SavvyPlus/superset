@@ -2,7 +2,7 @@ FROM ubuntu:latest
 MAINTAINER foamdino@gmail.com
 
 # basic dependencies
-RUN apt-get update && apt-get install -y build-essential python-dev python-pip curl wget jq
+RUN apt-get update && apt-get install -y build-essential python-dev python-pip curl wget jq vim
 
 # install kops/kubectl & aws cli
 RUN pip install --upgrade setuptools pip
@@ -21,6 +21,10 @@ RUN mv ./kubectl /usr/local/bin/kubectl
 # Kops user configuration and setup
 RUN mkdir /root/.aws
 COPY credentials /root/.aws/credentials
+RUN mkdir /root/.ssh
+RUN chmod 600 /root/.ssh
+COPY id_rsa.pub /root/.ssh/id_rsa.pub
+RUN chmod 600 /root/.ssh/id_rsa.pub
 RUN export AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id --profile kops)
 RUN export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key --profile kops)
 
@@ -33,4 +37,16 @@ RUN aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2Fu
 RUN aws iam create-user --user-name kops ||:
 RUN aws iam add-user-to-group --user-name kops --group-name kops
 
-RUN aws s3api create-bucket --bucket savvybi-superset-state-store --region us-east-1
+#RUN aws s3api create-bucket --bucket savvybi-superset-state-store --region us-east-1
+#RUN aws s3api put-bucket-versioning --bucket savvybi-superset-state-store  --versioning-configuration Status=Enabled
+
+ARG CLUSTERNAME=superset.savvybi.enterprises
+RUN echo $CLUSTERNAME
+ENV KOPS_STATE_STORE=s3://savvybi-superset-state-store
+ENV NAME=$CLUSTERNAME
+
+RUN kops create cluster --node-size=t2.large --zones=ap-southeast-2a,ap-southeast-2b --node-count=2 --name=${NAME} ||:
+RUN kops create secret --name ${NAME} sshpublickey admin -i ~/.ssh/id_rsa.pub
+RUN kops update cluster ${NAME} --yes
+
+CMD /bin/bash
