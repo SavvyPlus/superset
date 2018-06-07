@@ -8,11 +8,13 @@ else
   echo "CLUSTERNAME set to '$CLUSTERNAME'";
 fi
 
-echo "Please ensure that you have already configured DNS: https://github.com/kubernetes/kops/blob/master/docs/aws.md\n"
-read -p "Press any key to continue... \n" -n1 -s
+echo "Please ensure that you have already configured DNS: https://github.com/kubernetes/kops/blob/master/docs/aws.md"
+read -p "Press any key to continue... " -n1 -s
+echo
 
-echo "Please ensure that your aws account is configured with enough permissions to correctly create the kops user\n"
-read -p "Press any key to continue... \n" -n1 -s
+echo "Please ensure that your aws account is configured with enough permissions to correctly create the kops user"
+read -p "Press any key to continue... " -n1 -s
+echo
 
 echo "Creating s3 bucket for cluster store..."
 aws s3api create-bucket --bucket savvybi-superset-state-store --region us-east-1

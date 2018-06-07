@@ -45,8 +45,8 @@ RUN echo $CLUSTERNAME
 ENV KOPS_STATE_STORE=s3://savvybi-superset-state-store
 ENV NAME=$CLUSTERNAME
 
-RUN kops create cluster --node-size=t2.large --zones=ap-southeast-2a,ap-southeast-2b --node-count=2 --name=${NAME} ||:
-RUN kops create secret --name ${NAME} sshpublickey admin -i ~/.ssh/id_rsa.pub
-RUN kops update cluster ${NAME} --yes
+#RUN kops create cluster --node-size=t2.large --zones=ap-southeast-2a,ap-southeast-2b --node-count=2 --name=${NAME} ||:
+#RUN kops create secret --name ${NAME} sshpublickey admin -i ~/.ssh/id_rsa.pub
+#RUN kops update cluster ${NAME} --yes
 
 CMD /bin/bash
