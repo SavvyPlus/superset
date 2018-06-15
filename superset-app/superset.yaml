@@ -4,6 +4,8 @@ metadata:
   labels:
     k8s-app: superset
   name: superset
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: superset-app.superset.savvybi.enterprises
 spec:
   type: LoadBalancer
   ports:
