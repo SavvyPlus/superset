@@ -18,6 +18,12 @@ Checkout the repo from github and:
 1. From inside the superset-cluster-kops docker container, run the following to validate that the cluster is ready:
 `kops validate cluster`
 
+## Request SSL Certificate from AWS Certificate Manager
+
+Using the AWS web console, go to Certificate Manager and request a certificate for `*.superset.savvybi.enterprises`
+
+Use the DNS validation method.  When the certificate has been validated, copy the arn of the certificate to use in the nginx.yaml and superset.yaml deployment files
+
 ## Deploying Kubernetes Dashboard
 
 From the top level of the git repository
@@ -59,6 +65,8 @@ From the top level of the git repository
 ```
 1. Run `kops update cluster ${NAME} --yes`
 
+1. Run `kops rolling-update cluster` to ensure that changes are applied
+
 1. From inside the superset-cluster-kops docker container, run the following to deploy the superset application:
 `kubectl create -f /files/external-dns.yaml`
 
@@ -81,3 +89,17 @@ you should see something like:
 `LoadBalancer Ingress:     a9c4e359f6d9711e8b31c068d3110b28-2094159502.ap-southeast-2.elb.amazonaws.com`
 browsing to that location will give the superset login page
 1. Wait for 10 minutes for ExternalDNS to generate a nice url and then browse to `http://superset-app.superset.savvybi.enterprises` - login with admin/pa55word
+
+## SSL Certificate
+
+From the top level of the git repository
+`sudo docker run -v $(pwd)/superset-app:/files -it savvybi/superset-cluster-kops:0.1`
+
+1. `aws acm request-certificate --domain-name superset.savvybi.enterprises --validation-method DNS --idempotency-token 91adc45q --subject-alternative-names *.superset.savvybi.enterprises`
+
+1. Copy the returned arn eg: `arn:aws:acm:ap-southeast-2:547051082101:certificate/0a83ceab-4568-4bbb-a44c-605486e0018c`
+
+1. For each of the pending validation records in the DomainValidationOptions:
+`aws acm describe-certificate --certificate-arn arn:aws:acm:ap-southeast-2:547051082101:certificate/0a83ceab-4568-4bbb-a44c-605486e0018c --region ap-southeast-2 | jq .Certificate.DomainValidationOptions`
+
+1. Go to https://ap-southeast-2.console.aws.amazon.com/acm/home?region=ap-southeast-2#/

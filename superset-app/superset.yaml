@@ -6,12 +6,16 @@ metadata:
   name: superset
   annotations:
     external-dns.alpha.kubernetes.io/hostname: superset-app.superset.savvybi.enterprises
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:ap-southeast-2:547051082101:certificate/db421ea7-2bb1-4e29-a9cc-5fcd9937b752
 spec:
   type: LoadBalancer
   ports:
-    - port: 80
-      targetPort: 8088
+    - name: https
       protocol: TCP
+      port: 443
+      targetPort: backend-http
   selector:
     k8s-app: superset
 ---
@@ -34,3 +38,4 @@ spec:
           image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/superset-app:0.1-dev
           ports:
           - containerPort: 8088
+            name: backend-http
