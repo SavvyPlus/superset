@@ -103,3 +103,15 @@ From the top level of the git repository
 `aws acm describe-certificate --certificate-arn arn:aws:acm:ap-southeast-2:547051082101:certificate/0a83ceab-4568-4bbb-a44c-605486e0018c --region ap-southeast-2 | jq .Certificate.DomainValidationOptions`
 
 1. Go to https://ap-southeast-2.console.aws.amazon.com/acm/home?region=ap-southeast-2#/
+
+## Deploying zookeeper
+
+If you have already created the k8s cluster, you will need to expand the cluster to at least 3 nodes.
+
+From the top level of the git repository
+`sudo docker run -v $(pwd)/druid:/files -it savvybi/superset-cluster-kops:0.1`
+
+1. From inside the superset-cluster-kops docker container, run the following
+1. `kops export kubecfg --name=${NAME}`
+1. `kops edit ig nodes` and change to `maxSize: 3` and `minSize: 3`
+1. Run the zookeeper deployment `kubectl apply -f /files/zookeeper.yaml`
