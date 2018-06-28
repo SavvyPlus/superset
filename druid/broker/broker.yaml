@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: druid-broker-deployment
+  labels:
+    k8s-app: druid-broker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: druid-broker
+  template:
+    metadata:
+      labels:
+        k8s-app: druid-broker
+    spec:
+      hostname: druid-broker
+      containers:
+      - name: druid-broker
+        image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-broker:0.1
+        ports:
+          - containerPort: 8082
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: druid-broker
+  labels:
+    k8s-app: druid-broker
+spec:
+  type: NodePort
+  ports:
+  - name: broker-port
+    port: 8082
+  selector:
+    k8s-app: druid-broker
