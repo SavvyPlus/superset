@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: druid-historical-deployment
+  labels:
+    k8s-app: druid-historical
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: druid-historical-rc
+        k8s-app: druid-historical
+    spec:
+      containers:
+      - name: druid-historical
+        image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-historical:0.1
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 8083
+        #TODO add readiness & liveness probes
+        #volumeMounts:
+        #  - name: data
+        #    mountPath: /var/druid/segments
+        #  - name: segment-cache
+        #    mountPath: /var/druid/segment-cache
+        #  - name: config-volume
+        #    mountPath: "/iap-druid/{{ .Values.iapVersion }}/conf/druid/"
+      #volumes:
+      #- name: data
+      #  persistentVolumeClaim:
+      #    claimName: {{ .Values.druidSegmentDeepStorage }}
+      #- name: segment-cache
+      #  persistentVolumeClaim:
+      #    claimName: {{ .Values.druidSegmentCache }}
+      #- name: config-volume
+      #  configMap:
+      #    name: common-runtime-configmap
+      #    items:
+      #      - key: common.runtime.properties
+      #        path: _common/common.runtime.properties
+      #      - key: "{{ .Values.nodes.historical.name }}.runtime.properties"
+      #        path: historical/runtime.properties
+      #      - key: "{{ .Values.nodes.historical.name }}.jvm.config"
+      #        path: historical/jvm.config
+      #      - key: "{{ .Values.nodes.historical.name }}.main.config"
+      #        path: historical/main.config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: druid-historical
+  #TODO flexible service Name, configMap
+  labels:
+    k8s-app: druid-historical
+spec:
+  type: ClusterIP
+  ports:
+  - name: druid-historical-port
+    port: 8083
+  selector:
+    k8s-app: druid-historical-rc

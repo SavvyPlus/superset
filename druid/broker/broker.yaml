@@ -18,6 +18,7 @@ spec:
       containers:
       - name: druid-broker
         image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-broker:0.1
+        imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 8082
 
@@ -31,7 +32,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - name: broker-port
+  - name: druid-broker-port
     port: 8082
   selector:
     k8s-app: druid-broker
