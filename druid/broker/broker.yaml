@@ -18,7 +18,7 @@ spec:
       containers:
       - name: druid-broker
         image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-broker:0.1
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
           - containerPort: 8082
 
