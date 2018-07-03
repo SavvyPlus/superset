@@ -18,7 +18,7 @@ spec:
       containers:
       - name: druid-coordinator
         image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-coordinator:0.1
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
           - containerPort: 8081
 
@@ -35,5 +35,4 @@ spec:
   - name: druid-coordinator-port
     port: 8081
   selector:
-    matchLabels:
-      k8s-app: druid-coordinator
+    k8s-app: druid-coordinator
