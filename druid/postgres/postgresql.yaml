@@ -1,0 +1,136 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pgset-sa
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pgset-primary
+  labels:
+    name: pgset-primary
+    k8s-app: pgset-primary
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+    nodePort: 0
+  selector:
+    name: pgset-primary
+  sessionAffinity: None
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pgset-replica
+  labels:
+    name: pgset-replica
+    k8s-app: pgset-replica
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+    nodePort: 0
+  selector:
+    name: pgset-replica
+  sessionAffinity: None
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgset
+  labels:
+    name: pgset
+spec:
+  ports:
+  - port: 5432
+    name: web
+  clusterIP: None
+  selector:
+    k8s-app: pgset
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pgset
+  labels:
+    name: pgset
+    k8s-app: pgset
+spec:
+  selector:
+    matchLabels:
+      k8s-app: pgset
+  serviceName: pgset-service
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        k8s-app: pgset
+    spec:
+      serviceAccount:
+      containers:
+      - image: crunchydata/crunchy-postgres:centos7-10.4-1.8.3
+        name: postgresql
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: PGHOST
+          value: /tmp
+        - name: PG_PRIMARY_USER
+          value: primaryuser
+        - name: PG_MODE
+          value: set
+        - name: PG_PRIMARY_HOST
+          value: pgset-primary
+        - name: PG_REPLICA_HOST
+          value: pgset-replica
+        - name: PG_PRIMARY_PORT
+          value: 5432
+        - name: PG_PRIMARY_PASSWORD
+          value: password
+        - name: PG_USER
+          value: testuser
+        - name: PG_PASSWORD
+          value: password
+        - name: PG_DATABASE
+          value: userdb
+        - name: PG_ROOT_PASSWORD
+          value: password
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512mi
+        volumeMounts:
+        - mountPath: /pgdata
+          name: pgdata
+        - mountPath: /backup
+          name: backup
+          readOnly: true
+      volumes:
+      - emptyDir: {}
+        name: pgdata
+        persistentVolumeClaim:
+          claimName: pgset-pvc
+      - emptyDir: {}
+        name: backup
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgset-pvc
+  labels:
+    k8s-app: pgset
+spec:
+  selector:
+    matchLabels:
+      name: pgdata
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
