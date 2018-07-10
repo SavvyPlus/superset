@@ -104,6 +104,14 @@ From the top level of the git repository
 
 1. Go to https://ap-southeast-2.console.aws.amazon.com/acm/home?region=ap-southeast-2#/
 
+## Deploying postgres
+From the top level of the git repository
+`sudo docker run -v $(pwd)/superset-app:/files -it savvybi/superset-cluster-kops:0.1`
+
+1. From inside the superset-cluster-kops docker container, run the following
+1. `kops export kubecfg --name=${NAME}`
+1. `kubectl create -f /files/postgres/postgresql`
+
 ## Deploying zookeeper
 
 If you have already created the k8s cluster, you will need to expand the cluster to at least 3 nodes.

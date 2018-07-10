@@ -42,13 +42,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: pgset
+  name: pgset-hs
   labels:
-    name: pgset
+    name: pgset-hs
 spec:
   ports:
   - port: 5432
-    name: web
+    name: server
   clusterIP: None
   selector:
     k8s-app: pgset
@@ -64,17 +64,18 @@ spec:
   selector:
     matchLabels:
       k8s-app: pgset
-  serviceName: pgset-service
+  serviceName: pgset-hs
   replicas: 2
   template:
     metadata:
       labels:
         k8s-app: pgset
     spec:
-      serviceAccount:
+      serviceAccount: pgset-sa
       containers:
-      - image: crunchydata/crunchy-postgres:centos7-10.4-1.8.3
-        name: postgresql
+      - image: "crunchydata/crunchy-postgres:centos7-10.4-1.8.3"
+        imagePullPolicy: Always
+        name: pgset
         ports:
         - containerPort: 5432
           name: postgres
@@ -90,7 +91,7 @@ spec:
         - name: PG_REPLICA_HOST
           value: pgset-replica
         - name: PG_PRIMARY_PORT
-          value: 5432
+          value: "5432"
         - name: PG_PRIMARY_PASSWORD
           value: password
         - name: PG_USER
@@ -103,34 +104,33 @@ spec:
           value: password
         resources:
           requests:
-            cpu: 200m
-            memory: 512mi
+            cpu: "200m"
+            memory: "1Gi"
         volumeMounts:
-        - mountPath: /pgdata
-          name: pgdata
-        - mountPath: /backup
-          name: backup
-          readOnly: true
+          - mountPath: /pgdata
+            name: pgdata
+          - mountPath: /backup
+            name: backup
+            readOnly: true
       volumes:
-      - emptyDir: {}
-        name: pgdata
+      - name: pgdata
         persistentVolumeClaim:
-          claimName: pgset-pvc
-      - emptyDir: {}
-        name: backup
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pgset-pvc
-  labels:
-    k8s-app: pgset
-spec:
-  selector:
-    matchLabels:
+          claimName: pgdata-claim
+      - name: backup
+        persistentVolumeClaim:
+          claimName: backup-claim
+  volumeClaimTemplates:
+  - metadata:
       name: pgdata
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 20Gi
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: "10Gi"
+  - metadata:
+      name: backup
+    spec:
+      accessModes: [ "ReadOnlyOnce" ]
+      resources:
+        requests:
+          storage: "10Gi"
