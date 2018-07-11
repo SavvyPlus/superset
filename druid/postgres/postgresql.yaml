@@ -111,7 +111,6 @@ spec:
             name: pgdata
           - mountPath: /backup
             name: backup
-            readOnly: true
       volumes:
       - name: pgdata
         persistentVolumeClaim:
@@ -130,7 +129,7 @@ spec:
   - metadata:
       name: backup
     spec:
-      accessModes: [ "ReadOnlyOnce" ]
+      accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
           storage: "10Gi"
