@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Values.nodes.coordinator.name }}-deployment"
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  replicas: {{ .Values.nodes.coordinator.replicaCount }}
+  template:
+    metadata:
+      labels:
+        name: "{{ .Chart.Name }}-{{ .Values.nodes.coordinator.name }}-rc"
+        app: {{ template "fullname" . }}
+    spec:
+      containers:
+      - name: "{{ .Chart.Name }}-{{ .Values.nodes.coordinator.name }}"
+        image: "{{ .Values.nodes.coordinator.image.repository }}:{{ .Values.nodes.coordinator.image.tag }}"
+        imagePullPolicy: {{ .Values.nodes.coordinator.image.pullPolicy }}
+        ports:
+        {{range .Values.nodes.coordinator.service.ports }}
+          - containerPort: {{ .port }}
+        {{end}}
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/iap-druid/{{ .Values.iapVersion }}/conf/druid/"
+
+        #TODO add readiness & liveness probes
+      volumes:
+        - name: config-volume
+          configMap:
+            name: common-runtime-configmap
+            items:
+            - key: common.runtime.properties
+              path: _common/common.runtime.properties
+            - key: "{{ .Values.nodes.coordinator.name }}.runtime.properties"
+              path: coordinator/runtime.properties
+            - key: "{{ .Values.nodes.coordinator.name }}.jvm.config"
+              path: coordinator/jvm.config
+            - key: "{{ .Values.nodes.coordinator.name }}.main.config"
+              path: coordinator/main.config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.nodes.coordinator.service.name }}
+  #TODO flexible service Name, configMap
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  type: {{ .Values.nodes.coordinator.service.type }}
+  ports:
+  {{range .Values.nodes.coordinator.service.ports }}
+  - name: {{ .name }}
+    port: {{ .port }}
+  {{end}}
+  selector:
+    name: "{{ .Chart.Name }}-{{ .Values.nodes.coordinator.name }}-rc"

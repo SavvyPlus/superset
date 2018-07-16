@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name:  {{ .Values.nodes.middlemanager.service.name }}
+  labels:
+    app: druid
+spec:
+  type: {{ .Values.nodes.middlemanager.service.type }}
+  ports:
+  {{range .Values.nodes.middlemanager.service.ports }}
+  - name: {{ .name }}
+    port: {{ .port }}
+  {{end}}
+  # *.nginx.default.svc.cluster.local
+  selector:
+    name: middlemanager
+---
+apiVersion: apps/v1alpha1
+kind: PetSet
+metadata:
+  name: {{ .Values.nodes.middlemanager.service.name }}
+spec:
+  serviceName: {{ .Values.nodes.middlemanager.service.name }}
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: druid
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+      - name: {{ .Values.nodes.middlemanager.service.name }}
+        image: "{{ .Values.nodes.middlemanager.image.repository }}:{{ .Values.nodes.middlemanager.image.tag }}"
+        imagePullPolicy: {{ .Values.nodes.middlemanager.image.pullPolicy }}
+        ports:
+        {{range .Values.nodes.middlemanager.service.ports }}
+          - containerPort: {{ .port }}
+        {{end}}
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/iap-druid/{{ .Values.iapVersion }}/conf/druid/"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: common-runtime-configmap
+            items:
+            - key: common.runtime.properties
+              path: _common/common.runtime.properties
+            - key: "{{ .Values.nodes.middlemanager.name }}.runtime.properties"
+              path: middleManager/runtime.properties
+            - key: "{{ .Values.nodes.middlemanager.name }}.jvm.config"
+              path: middleManager/jvm.config
+            - key: "{{ .Values.nodes.middlemanager.name }}.main.config"
+              path: middleManager/main.config

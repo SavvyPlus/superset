@@ -106,11 +106,11 @@ From the top level of the git repository
 
 ## Deploying postgres
 From the top level of the git repository
-`sudo docker run -v $(pwd)/superset-app:/files -it savvybi/superset-cluster-kops:0.1`
+`sudo docker run -v $(pwd)/druid:/files -it savvybi/superset-cluster-kops:0.1`
 
 1. From inside the superset-cluster-kops docker container, run the following
 1. `kops export kubecfg --name=${NAME}`
-1. `kubectl create -f /files/postgres/postgresql`
+1. `kubectl create -f /files/postgres/postgresql.yaml`
 
 ## Deploying zookeeper
 
@@ -123,3 +123,30 @@ From the top level of the git repository
 1. `kops export kubecfg --name=${NAME}`
 1. `kops edit ig nodes` and change to `maxSize: 3` and `minSize: 3`
 1. Run the zookeeper deployment `kubectl apply -f /files/zookeeper.yaml`
+
+## Configuring Helm
+We use [helm](http://helm.sh) to allow us to find/install and update packages to the Kubernetes cluster.
+
+Helm acts as a package manager similar to apt-get on ubuntu or yum on redhat/centos.
+
+Helm has two components, a client and a server.  To install/initialise helm:
+From the top level of the git repository
+
+1. `sudo docker run -v $(pwd):/files -it savvybi/superset-cluster-kops:0.1`
+1. `kops export kubecfg --name=${NAME}`
+1. Make sure the cluster is up and running: `kops validate cluster`
+1. Create a serviceaccount for Tiller: `kubectl create serviceaccount tiller --namespace kube-system`
+1. Apply the correct RBAC profile: `kubectl apply -f /files/helm/rbac-config.yaml`
+1. Install a chart from Helm: `helm install stable/postgresql`
+
+More charts can be found: https://hub.kubeapps.com/
+
+## Destroying the Superset cluster
+
+If you need to completely delete the cluster:
+From the top level of the git repository
+`sudo docker run -v $(pwd)/superset-app:/files -it savvybi/superset-cluster-kops:0.1`
+
+1. From inside the superset-cluster-kops docker container, run the following
+1. `kops export kubecfg --name=${NAME}`
+1. `kops delete cluster --name ${NAME} --yes`

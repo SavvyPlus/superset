@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Values.nodes.historical.name }}-deployment"
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  replicas: {{ .Values.nodes.historical.replicaCount }}
+  template:
+    metadata:
+      labels:
+        name: "{{ .Chart.Name }}-{{ .Values.nodes.historical.name }}-rc"
+        app: {{ template "fullname" . }}
+    spec:
+      containers:
+      - name: "{{ .Chart.Name }}-{{ .Values.nodes.historical.name }}"
+        image: "{{ .Values.nodes.historical.image.repository }}:{{ .Values.nodes.historical.image.tag }}"
+        imagePullPolicy: {{ .Values.nodes.historical.image.pullPolicy }}
+        ports:
+        {{range .Values.nodes.historical.service.ports }}
+          - containerPort: {{ .port }}
+        {{end}}
+        #TODO add readiness & liveness probes
+        volumeMounts:
+          - name: data
+            mountPath: /var/druid/segments
+          - name: segment-cache
+            mountPath: /var/druid/segment-cache
+          - name: config-volume
+            mountPath: "/iap-druid/{{ .Values.iapVersion }}/conf/druid/"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Values.druidSegmentDeepStorage }}
+      - name: segment-cache
+        persistentVolumeClaim:
+          claimName: {{ .Values.druidSegmentCache }}
+      - name: config-volume
+        configMap:
+          name: common-runtime-configmap
+          items:
+            - key: common.runtime.properties
+              path: _common/common.runtime.properties
+            - key: "{{ .Values.nodes.historical.name }}.runtime.properties"
+              path: historical/runtime.properties
+            - key: "{{ .Values.nodes.historical.name }}.jvm.config"
+              path: historical/jvm.config
+            - key: "{{ .Values.nodes.historical.name }}.main.config"
+              path: historical/main.config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.nodes.historical.service.name }}
+  #TODO flexible service Name, configMap
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  type: {{ .Values.nodes.historical.service.type }}
+  ports:
+  {{range .Values.nodes.historical.service.ports }}
+  - name: {{ .name }}
+    port: {{ .port }}
+  {{end}}
+  selector:
+    name: "{{ .Chart.Name }}-{{ .Values.nodes.historical.name }}-rc"

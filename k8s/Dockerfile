@@ -18,6 +18,11 @@ RUN wget -O kubectl https://storage.googleapis.com/kubernetes-release/release/$(
 RUN chmod +x ./kubectl
 RUN mv ./kubectl /usr/local/bin/kubectl
 
+# Helm
+RUN curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
+RUN chmod +x get_helm.sh
+RUN ./get_helm.sh
+
 # Kops user configuration and setup
 RUN mkdir /root/.aws
 COPY credentials /root/.aws/credentials
