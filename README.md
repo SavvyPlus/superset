@@ -141,6 +141,16 @@ From the top level of the git repository
 
 More charts can be found: https://hub.kubeapps.com/
 
+## Deploying druid from local charts
+From the top level of the git repository
+`sudo docker run -v $(pwd)/druid:/files -it savvybi/superset-cluster-kops:0.1`
+
+1. From inside the superset-cluster-kops docker container, run the following
+1. `kops export kubecfg --name=${NAME}`
+1. Make sure the cluster is up and running: `kops validate cluster`
+1. `helm install /files/helm/druid-charts/`
+
+
 ## Destroying the Superset cluster
 
 If you need to completely delete the cluster:

@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name:  {{ .Values.nodes.middlemanager.service.name }}
   labels:
-    app: druid
+    k8s-app: {{ .Values.nodes.middlemanager.service.name }}
 spec:
   type: {{ .Values.nodes.middlemanager.service.type }}
   ports:
@@ -12,29 +12,31 @@ spec:
   - name: {{ .name }}
     port: {{ .port }}
   {{end}}
-  # *.nginx.default.svc.cluster.local
   selector:
-    name: middlemanager
+    k8s-app: {{ .Values.nodes.middlemanager.service.name }}
 ---
-apiVersion: apps/v1alpha1
-kind: PetSet
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   name: {{ .Values.nodes.middlemanager.service.name }}
 spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Values.nodes.middlemanager.service.name }}
   serviceName: {{ .Values.nodes.middlemanager.service.name }}
   replicas: 2
   template:
     metadata:
       labels:
-        app: druid
+        k8s-app: {{ .Values.nodes.middlemanager.service.name }}
       annotations:
         pod.alpha.kubernetes.io/initialized: "true"
     spec:
       terminationGracePeriodSeconds: 0
       containers:
-      - name: {{ .Values.nodes.middlemanager.service.name }}
-        image: "{{ .Values.nodes.middlemanager.image.repository }}:{{ .Values.nodes.middlemanager.image.tag }}"
-        imagePullPolicy: {{ .Values.nodes.middlemanager.image.pullPolicy }}
+      - name: druid-middlemanager
+        image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-middlemanager:0.1
+        imagePullPolicy: Always
         ports:
         {{range .Values.nodes.middlemanager.service.ports }}
           - containerPort: {{ .port }}

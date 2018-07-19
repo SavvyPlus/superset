@@ -19,20 +19,20 @@ spec:
         ports:
           - containerPort: 8083
         #TODO add readiness & liveness probes
-        #volumeMounts:
-        #  - name: data
-        #    mountPath: /var/druid/segments
-        #  - name: segment-cache
-        #    mountPath: /var/druid/segment-cache
-        #  - name: config-volume
-        #    mountPath: "/iap-druid/{{ .Values.iapVersion }}/conf/druid/"
-      #volumes:
-      #- name: data
-      #  persistentVolumeClaim:
-      #    claimName: {{ .Values.druidSegmentDeepStorage }}
-      #- name: segment-cache
-      #  persistentVolumeClaim:
-      #    claimName: {{ .Values.druidSegmentCache }}
+        volumeMounts:
+          - name: data
+            mountPath: /var/druid/segments
+          - name: segment-cache
+            mountPath: /var/druid/segment-cache
+      #    - name: config-volume
+      #      mountPath: "/{{ .Values.iapVersion }}/conf/druid/"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: druid-deep-storage
+      - name: segment-cache
+        persistentVolumeClaim:
+          claimName: druid-deep-segment-cache
       #- name: config-volume
       #  configMap:
       #    name: common-runtime-configmap
@@ -58,5 +58,5 @@ spec:
   ports:
   - name: druid-historical-port
     port: 8083
-  selector:
+  labelSelector:
     k8s-app: druid-historical-rc
