@@ -81,6 +81,7 @@ From the top level of the git repository
 
 `sudo docker run -v $(pwd)/superset-app:/files -it savvybi/superset-cluster-kops:0.1`
 
+1. `kops export kubecfg --name=${NAME}`
 1. From inside the superset-cluster-kops docker container, run the following to deploy the superset application:
 `kubectl create -f /files/superset.yaml`
 1. From inside the superset-cluster-kops docker container, run the following to get the external facing url:
@@ -137,6 +138,7 @@ From the top level of the git repository
 1. Make sure the cluster is up and running: `kops validate cluster`
 1. Create a serviceaccount for Tiller: `kubectl create serviceaccount tiller --namespace kube-system`
 1. Apply the correct RBAC profile: `kubectl apply -f /files/helm/rbac-config.yaml`
+1. Init helm `helm init`
 1. Install a chart from Helm: `helm install stable/postgresql`
 
 More charts can be found: https://hub.kubeapps.com/

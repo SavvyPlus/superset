@@ -16,6 +16,10 @@ spec:
       protocol: TCP
       port: 443
       targetPort: backend-http
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: backend-http
   selector:
     k8s-app: superset
 ---
