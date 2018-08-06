@@ -5,7 +5,7 @@ metadata:
     k8s-app: superset
   name: superset
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: superset-app.superset.savvybi.enterprises
+    external-dns.alpha.kubernetes.io/hostname: demo-app.staging.savvybi.enterprises
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
     service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:ap-southeast-2:547051082101:certificate/db421ea7-2bb1-4e29-a9cc-5fcd9937b752
