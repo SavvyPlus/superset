@@ -1,6 +1,14 @@
 FROM 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-base:0.1
 MAINTAINER foamdino@gmail.com
 
-ENTRYPOINT ["java","-server","-Xms64m","-Xmx64m","-Duser.timezone=UTC","-Dfile.encoding=UTF-8", \
-"-Djava.io.tmpdir=var/tmp","-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager","-cp", \
-"conf-quickstart/druid/_common:conf-quickstart/druid/middleManager:lib/*","io.druid.cli.Main","server","middleManager"]
+EXPOSE 8081
+EXPOSE 8082
+EXPOSE 8083
+EXPOSE 8090
+EXPOSE 8091
+EXPOSE 3306
+EXPOSE 2181 2888 3888
+EXPOSE 8100 8101 8102 8103 8104
+
+WORKDIR /opt/druid
+ENTRYPOINT cd /opt/druid && /opt/druid/bin/run.sh middleManager

@@ -26,9 +26,9 @@ nodes:
     name: "coordinator"
     replicaCount: 1
     image:
-      repository: jkaralus/druid8s-coordinator
-      tag: latest
-      pullPolicy: IfNotPresent
+      repository: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-coordinator
+      tag: 0.1
+      pullPolicy: Always
     service:
       name: druid-coordinator-service
       type: NodePort
@@ -39,9 +39,9 @@ nodes:
     name: "overlord"
     replicaCount: 1
     image:
-      repository: jkaralus/druid8s-overlord
-      tag: latest
-      pullPolicy: IfNotPresent
+      repository: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-overlord
+      tag: 0.1
+      pullPolicy: Always
     service:
       name: druid-overlord-service
       type: NodePort
@@ -52,9 +52,9 @@ nodes:
     name: "historical"
     replicaCount: 1
     image:
-      repository: jkaralus/druid8s-historical
-      tag: latest
-      pullPolicy: IfNotPresent
+      repository: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-historical
+      tag: 0.1
+      pullPolicy: Always
     service:
       name: druid-historical-service
       type: ClusterIP
@@ -65,48 +65,22 @@ nodes:
     name: "broker"
     replicaCount: 1
     image:
-      repository: jkaralus/druid8s-broker
-      tag: latest
-      pullPolicy: IfNotPresent
+      repository: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-broker
+      tag: 0.1
+      pullPolicy: Always
     service:
       name: druid-broker-service
       type: NodePort
       ports:
         - name: broker-port
           port: 8082
-  tranquility:
-    name: "tranquility"
-    replicaCount: 1
-    image:
-      repository: jkaralus/druid8s-tranquility
-      tag: latest
-      pullPolicy: IfNotPresent
-    service:
-      name: druid-tranquility-service
-      type: NodePort
-      ports:
-        - name: tranquility-port
-          port: 8200
-  pivot:
-    name: "pivot"
-    replicaCount: 1
-    image:
-      repository: jkaralus/druid8s-pivot
-      tag: latest
-      pullPolicy: IfNotPresent
-    service:
-      name: druid-pivot-service
-      type: NodePort
-      ports:
-        - name: pivot-port
-          port: 9095
   middlemanager:
     name: "middlemanager"
     replicaCount: 1
     image:
-      repository: jkaralus/druid8s-middlemanager
-      tag: latest
-      pullPolicy: IfNotPresent
+      repository: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-middlemanager
+      tag: 0.1
+      pullPolicy: Always
     service:
       name: druid-middlemanager-service
       type: NodePort
@@ -121,16 +95,6 @@ nodes:
           port: 8102
         - name: peon-3
           port: 8103
-
-image:
-  historical:
-    repository: jkaralus/druid8s-historical
-    tag: latest
-    pullPolicy: IfNotPresent
-  quickstart:
-    repository: jkaralus/druid8s-quickstart
-    tag: latest
-    pullPolicy: IfNotPresent
 service:
   historical:
     name: historical

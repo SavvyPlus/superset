@@ -22,7 +22,7 @@ spec:
         {{end}}
         volumeMounts:
         - name: config-volume
-          mountPath: "/iap-druid/{{ .Values.iapVersion }}/conf/druid/"
+          mountPath: "/etc/druid/conf"
 
         #TODO add readiness & liveness probes
       volumes:
@@ -32,11 +32,11 @@ spec:
             items:
             - key: common.runtime.properties
               path: _common/common.runtime.properties
-            - key: "{{ .Values.nodes.coordinator.name }}.runtime.properties"
+            - key: coordinator.runtime.properties
               path: coordinator/runtime.properties
-            - key: "{{ .Values.nodes.coordinator.name }}.jvm.config"
+            - key: coordinator.jvm.config
               path: coordinator/jvm.config
-            - key: "{{ .Values.nodes.coordinator.name }}.main.config"
+            - key: coordinator.main.config
               path: coordinator/main.config
 ---
 apiVersion: v1

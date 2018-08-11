@@ -1,10 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.nodes.middlemanager.service.name }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Values.nodes.middlemanager.service.name }}
+  serviceName: {{ .Values.nodes.middlemanager.service.name }}
+  replicas: {{ .Values.nodes.middlemanager.replicaCount }}
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ .Values.nodes.middlemanager.service.name }}
+        name: {{ .Values.nodes.middlemanager.service.name }}
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+      - name: "{{ .Chart.Name }}-{{ .Values.nodes.middlemanager.name }}"
+        image: "{{ .Values.nodes.middlemanager.image.repository }}:{{ .Values.nodes.middlemanager.image.tag }}"
+        imagePullPolicy: {{ .Values.nodes.middlemanager.image.pullPolicy }}
+        ports:
+        {{range .Values.nodes.middlemanager.service.ports }}
+          - containerPort: {{ .port }}
+        {{end}}
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/etc/druid/conf"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: common-runtime-configmap
+            items:
+            - key: common.runtime.properties
+              path: _common/common.runtime.properties
+            - key: middleManager.runtime.properties
+              path: middleManager/runtime.properties
+            - key: middleManager.jvm.config
+              path: middleManager/jvm.config
+            - key: middleManager.main.config
+              path: middleManager/main.config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name:  {{ .Values.nodes.middlemanager.service.name }}
+  name: {{ .Values.nodes.middlemanager.service.name }}
+  #TODO flexible service Name, configMap
   labels:
-    k8s-app: {{ .Values.nodes.middlemanager.service.name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
   type: {{ .Values.nodes.middlemanager.service.type }}
   ports:
@@ -13,47 +59,4 @@ spec:
     port: {{ .port }}
   {{end}}
   selector:
-    k8s-app: {{ .Values.nodes.middlemanager.service.name }}
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: {{ .Values.nodes.middlemanager.service.name }}
-spec:
-  selector:
-    matchLabels:
-      k8s-app: {{ .Values.nodes.middlemanager.service.name }}
-  serviceName: {{ .Values.nodes.middlemanager.service.name }}
-  replicas: 2
-  template:
-    metadata:
-      labels:
-        k8s-app: {{ .Values.nodes.middlemanager.service.name }}
-      annotations:
-        pod.alpha.kubernetes.io/initialized: "true"
-    spec:
-      terminationGracePeriodSeconds: 0
-      containers:
-      - name: druid-middlemanager
-        image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/druid-middlemanager:0.1
-        imagePullPolicy: Always
-        ports:
-        {{range .Values.nodes.middlemanager.service.ports }}
-          - containerPort: {{ .port }}
-        {{end}}
-        volumeMounts:
-        - name: config-volume
-          mountPath: "/iap-druid/{{ .Values.iapVersion }}/conf/druid/"
-      volumes:
-        - name: config-volume
-          configMap:
-            name: common-runtime-configmap
-            items:
-            - key: common.runtime.properties
-              path: _common/common.runtime.properties
-            - key: "{{ .Values.nodes.middlemanager.name }}.runtime.properties"
-              path: middleManager/runtime.properties
-            - key: "{{ .Values.nodes.middlemanager.name }}.jvm.config"
-              path: middleManager/jvm.config
-            - key: "{{ .Values.nodes.middlemanager.name }}.main.config"
-              path: middleManager/main.config
+    name: "{{ .Chart.Name }}-{{ .Values.nodes.middlemanager.name }}-rc"

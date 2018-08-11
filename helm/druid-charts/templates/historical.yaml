@@ -27,7 +27,7 @@ spec:
           - name: segment-cache
             mountPath: /var/druid/segment-cache
           - name: config-volume
-            mountPath: "/iap-druid/{{ .Values.iapVersion }}/conf/druid/"
+            mountPath: "/etc/druid/conf"
       volumes:
       - name: data
         persistentVolumeClaim:
@@ -39,14 +39,29 @@ spec:
         configMap:
           name: common-runtime-configmap
           items:
-            - key: common.runtime.properties
-              path: _common/common.runtime.properties
-            - key: "{{ .Values.nodes.historical.name }}.runtime.properties"
-              path: historical/runtime.properties
-            - key: "{{ .Values.nodes.historical.name }}.jvm.config"
-              path: historical/jvm.config
-            - key: "{{ .Values.nodes.historical.name }}.main.config"
-              path: historical/main.config
+          - key: common.runtime.properties
+            path: _common/common.runtime.properties
+          - key: historical.runtime.properties
+            path: historical/runtime.properties
+          - key: historical.jvm.config
+            path: historical/jvm.config
+          - key: historical.main.config
+            path: historical/main.config
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: segment-cache
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
 ---
 apiVersion: v1
 kind: Service

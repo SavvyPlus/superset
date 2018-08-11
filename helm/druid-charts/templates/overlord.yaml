@@ -22,7 +22,7 @@ spec:
         {{end}}
         volumeMounts:
         - name: config-volume
-          mountPath: "/iap-druid/{{ .Values.iapVersion }}/conf/druid/"
+          mountPath: "/etc/druid/conf"
         #TODO add readiness & liveness probes
       volumes:
         - name: config-volume
@@ -31,11 +31,11 @@ spec:
             items:
             - key: common.runtime.properties
               path: _common/common.runtime.properties
-            - key: "{{ .Values.nodes.overlord.name }}.runtime.properties"
+            - key: overlord.runtime.properties
               path: overlord/runtime.properties
-            - key: "{{ .Values.nodes.overlord.name }}.jvm.config"
+            - key: overlord.jvm.config
               path: overlord/jvm.config
-            - key: "{{ .Values.nodes.overlord.name }}.main.config"
+            - key: overlord.main.config
               path: overlord/main.config
 ---
 apiVersion: v1
