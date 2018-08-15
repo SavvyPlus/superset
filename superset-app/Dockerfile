@@ -1,9 +1,10 @@
 FROM ubuntu:latest
 MAINTAINER foamdino@gmail.com
 
-RUN apt-get update && apt-get install -y build-essential libssl-dev libffi-dev python-dev python-pip libsasl2-dev libldap2-dev git
+RUN apt-get update && apt-get install -y build-essential libssl-dev libffi-dev python-dev python-pip libsasl2-dev libldap2-dev git libmysqlclient-dev
 RUN pip install --upgrade setuptools pip
 RUN pip install cryptography
+RUN pip install "PyAthenaJDBC>1.0.9" pymssql psycopg2 mysqlclient
 RUN pip install git+git://github.com/SavvyPlus/incubator-superset
 
 # superset configuration/setup
