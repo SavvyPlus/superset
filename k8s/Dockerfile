@@ -54,4 +54,7 @@ ENV NAME=$CLUSTERNAME
 #RUN kops create secret --name ${NAME} sshpublickey admin -i ~/.ssh/id_rsa.pub
 #RUN kops update cluster ${NAME} --yes
 
+RUN pip install requests
+RUN pip install beautifulsoup4
+
 CMD /bin/bash
