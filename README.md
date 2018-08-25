@@ -138,6 +138,8 @@ From the top level of the git repository
 1. Make sure the cluster is up and running: `kops validate cluster`
 1. Create a serviceaccount for Tiller: `kubectl create serviceaccount tiller --namespace kube-system`
 1. Apply the correct RBAC profile: `kubectl apply -f /files/helm/rbac-config.yaml`
+1. `kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller`
+1. `kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'`
 1. Init helm `helm init`
 1. Install a chart from Helm: `helm install stable/postgresql`
 
