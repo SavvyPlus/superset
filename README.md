@@ -5,12 +5,18 @@ and install [superset](https://superset.apache.org/)
 
 ## Creating the K8s cluster
 
-Checkout the repo from github and:
+Checkout the repo from github and set these variables:
+1. `export KOPS_STATE_STORE=s3://savvybi-superset-dts-state-store`
+1. `export NAME=$CLUSTERNAME`
+1. `export VPC=vpc-52292d36`
+1. `export NETWORK_CIDR=10.61.200.0/21`
 1. `cd superset-cluster/k8s`
 1. `./cluster.sh`
 1. `sudo docker run -it savvybi/superset-cluster-kops:0.1`
 1. From inside the superset-cluster-kops docker container, run the following to create the k8s spec
-`kops create cluster --node-size=t2.large --zones=ap-southeast-2a,ap-southeast-2b --node-count=2 --name=${NAME}`
+`kops create cluster --node-size=t2.large --zones=ap-southeast-2a --node-count=6 --name=${NAME} --vpc=${VPC}`
+1. `kops edit cluster ${NAME}`
+1. Check that the networkCIDR and networkID values match the env vars exported
 1. From inside the superset-cluster-kops docker container, run the following to use the spec to create the k8s cluster
 `kops update cluster ${NAME} --yes`
 1. From inside the superset-cluster-kops docker container, run the following to generate the kubectl config:
