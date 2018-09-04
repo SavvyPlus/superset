@@ -1,0 +1,27 @@
+{
+  "Comment": "Create a subdomain NS record in the parent domain",
+  "Changes": [
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "aws2-vpc-ss-dts.savvybi.enterprises",
+        "Type": "NS",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "ns-644.awsdns-16.net"
+          },
+          {
+            "Value": "ns-1106.awsdns-10.org"
+          },
+          {
+            "Value": "ns-1625.awsdns-11.co.uk"
+          },
+          {
+            "Value": "ns-430.awsdns-53.com"
+          }
+        ]
+      }
+    }
+  ]
+}

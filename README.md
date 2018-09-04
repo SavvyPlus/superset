@@ -4,17 +4,23 @@ This project contains the infrastructure/code required to create a [kubernetes](
 and install [superset](https://superset.apache.org/)
 
 ## Creating the K8s cluster
+Inside the AWS console, create the VPC with the correct name.
+Inside the AWS console, create an internet gateway with the correct name and associate this IGW with the VPC just created.
 
 Checkout the repo from github and set these variables:
-1. `export KOPS_STATE_STORE=s3://savvybi-superset-dts-state-store`
-1. `export NAME=$CLUSTERNAME`
-1. `export VPC=vpc-52292d36`
-1. `export NETWORK_CIDR=10.61.200.0/21`
 1. `cd superset-cluster/k8s`
 1. `./cluster.sh`
-1. `sudo docker run -it savvybi/superset-cluster-kops:0.1`
+1. `sudo docker run -v $(pwd)/k8s:/files -it savvybi/superset-cluster-kops:0.1`
+1. From inside the container export these env vars
+1. `export KOPS_STATE_STORE=s3://savvybi-superset-dts-state-store`
+1. `export NAME=$CLUSTERNAME`
+1. `kops create -f /files/aws2-vpc-ss-dts.savvybi.enterprises.yaml`
+1. `kops create secret --name aws2-vpc-ss-dts.savvybi.enterprises sshpublickey admin -i ~/.ssh/id_rsa.pub`
+1. `kops update cluster aws2-vpc-ss-dts.savvybi.enterprises --yes`
+
+### LEGACY
 1. From inside the superset-cluster-kops docker container, run the following to create the k8s spec
-`kops create cluster --node-size=t2.large --zones=ap-southeast-2a --node-count=6 --name=${NAME} --vpc=${VPC}`
+`kops create cluster --node-size=t2.large --zones=ap-southeast-2b --node-count=6 --name=${NAME} --vpc=${VPC} --subnets=${SUBNET_IDS}`
 1. `kops edit cluster ${NAME}`
 1. Check that the networkCIDR and networkID values match the env vars exported
 1. From inside the superset-cluster-kops docker container, run the following to use the spec to create the k8s cluster
@@ -23,6 +29,19 @@ Checkout the repo from github and set these variables:
 `kops export kubecfg --name=${NAME}`
 1. From inside the superset-cluster-kops docker container, run the following to validate that the cluster is ready:
 `kops validate cluster`
+
+## Configure correct DNS
+`ID=$(uuidgen) && aws route53 create-hosted-zone --name <superset subdomain>.savvybi.enterprises --caller-reference $ID | jq .DelegationSet.NameServers`
+
+Copy the list of NameServers
+
+`aws route53 list-hosted-zones | jq '.HostedZones[] | select(.Name=="savvybi.enterprises.") | .Id'`
+
+Copy the parent hostedzone id
+
+Edit `k8s/subdomain.json` to add the name servers listed earlier
+
+`aws route53 change-resource-record-sets --hosted-zone-id <parent-zone-id> --change-batch file://subdomain.json`
 
 ## Request SSL Certificate from AWS Certificate Manager
 
