@@ -13,7 +13,7 @@ Checkout the repo from github and set these variables:
 1. `sudo docker run -v $(pwd)/k8s:/files -it savvybi/superset-cluster-kops:0.1`
 1. From inside the container export these env vars
 1. `export KOPS_STATE_STORE=s3://savvybi-superset-dts-state-store`
-1. `export NAME=$CLUSTERNAME`
+1. `export NAME=aws2-vpc-ss-dts.savvybi.enterprises`
 1. `kops create -f /files/aws2-vpc-ss-dts.savvybi.enterprises.yaml`
 1. `kops create secret --name aws2-vpc-ss-dts.savvybi.enterprises sshpublickey admin -i ~/.ssh/id_rsa.pub`
 1. `kops update cluster aws2-vpc-ss-dts.savvybi.enterprises --yes`
@@ -164,8 +164,8 @@ From the top level of the git repository
 1. Create a serviceaccount for Tiller: `kubectl create serviceaccount tiller --namespace kube-system`
 1. Apply the correct RBAC profile: `kubectl apply -f /files/helm/rbac-config.yaml`
 1. `kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller`
-1. `kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'`
 1. Init helm `helm init`
+1. `kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'`
 1. Install a chart from Helm: `helm install stable/postgresql`
 
 More charts can be found: https://hub.kubeapps.com/

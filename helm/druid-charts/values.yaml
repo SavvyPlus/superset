@@ -44,7 +44,7 @@ nodes:
       pullPolicy: Always
     service:
       name: druid-overlord-service
-      type: NodePort
+      type: LoadBalancer
       ports:
         - name: overlord-port
           port: 8090
