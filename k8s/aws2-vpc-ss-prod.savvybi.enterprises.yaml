@@ -2,7 +2,7 @@ apiVersion: kops/v1alpha2
 kind: Cluster
 metadata:
   creationTimestamp: null
-  name: aws2-vpc-ss-dts.savvybi.enterprises
+  name: aws2-vpc-ss-prod.savvybi.enterprises
 spec:
   api:
     dns: {}
@@ -10,7 +10,7 @@ spec:
     rbac: {}
   channel: stable
   cloudProvider: aws
-  configBase: s3://savvybi-superset-dts-state-store/aws2-vpc-ss-dts.savvybi.enterprises
+  configBase: s3://savvybi-superset-prod-state-store/aws2-vpc-ss-prod.savvybi.enterprises
   etcdClusters:
   - etcdMembers:
     - instanceGroup: master-ap-southeast-2b
@@ -26,17 +26,17 @@ spec:
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: 1.10.3
-  masterPublicName: api.aws2-vpc-ss-dts.savvybi.enterprises
-  networkCIDR: 10.61.136.0/21
-  networkID: vpc-058107719bac509d2
+  masterPublicName: api.aws2-vpc-ss-prod.savvybi.enterprises
+  networkCIDR: 10.61.144.0/21
+  networkID: vpc-0d7f34b6fcd92608a
   networking:
     kubenet: {}
   nonMasqueradeCIDR: 100.64.0.0/10
   sshAccess:
   - 0.0.0.0/0
   subnets:
-  - cidr: 10.61.139.0/24
-    name: aws2_sub_ss_dts_pub_2b
+  - cidr: 10.61.147.0/24
+    name: aws2_sub_ss_prod_pub_2b
     type: Public
     zone: ap-southeast-2b
   topology:
@@ -66,7 +66,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: aws2-vpc-ss-dts.savvybi.enterprises
+    kops.k8s.io/cluster: aws2-vpc-ss-prod.savvybi.enterprises
   name: master-ap-southeast-2b
 spec:
   image: kope.io/k8s-1.9-debian-jessie-amd64-hvm-ebs-2018-03-11
@@ -77,7 +77,7 @@ spec:
     kops.k8s.io/instancegroup: master-ap-southeast-2b
   role: Master
   subnets:
-  - aws2_sub_ss_dts_pub_2b
+  - aws2_sub_ss_prod_pub_2b
 
 ---
 
@@ -86,15 +86,15 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: aws2-vpc-ss-dts.savvybi.enterprises
+    kops.k8s.io/cluster: aws2-vpc-ss-prod.savvybi.enterprises
   name: nodes
 spec:
   image: kope.io/k8s-1.9-debian-jessie-amd64-hvm-ebs-2018-03-11
-  machineType: t2.xlarge
+  machineType: t2.large
   maxSize: 6
   minSize: 6
   nodeLabels:
     kops.k8s.io/instancegroup: nodes
   role: Node
   subnets:
-  - aws2_sub_ss_dts_pub_2b
+  - aws2_sub_ss_prod_pub_2b

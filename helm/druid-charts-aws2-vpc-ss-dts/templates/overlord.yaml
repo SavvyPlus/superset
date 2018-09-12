@@ -7,7 +7,7 @@ metadata:
   name: {{ .Values.nodes.overlord.service.name }}
   #TODO flexible service Name, configMap
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: druid-overlord.aws-vpc-ss-dts.savvybi.enterprises
+    external-dns.alpha.kubernetes.io/hostname: druid-overlord.aws2-vpc-ss-dts.savvybi.enterprises
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
     service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:ap-southeast-2:547051082101:certificate/72dfd182-e87c-4b6b-803f-a12af7f1c4c0

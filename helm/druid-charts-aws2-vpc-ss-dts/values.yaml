@@ -31,7 +31,7 @@ nodes:
       pullPolicy: Always
     service:
       name: druid-coordinator-service
-      type: NodePort
+      type: LoadBalancer
       ports:
         - name: coordinator-port
           port: 8081

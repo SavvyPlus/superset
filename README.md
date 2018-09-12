@@ -96,7 +96,7 @@ From the top level of the git repository
 `kubectl create -f /files/external-dns.yaml`
 
 1. From inside the superset-cluster-kops docker container, run the following to deploy a test nginx service:
-`kubectl create -f /files/nginx.yaml`
+`kubectl create -f /files/nginx-ss-dts.yaml`
 
 1. Wait for 5-10 minutes and then check that ExternalDNS has correctly created a new DNS entry in Route53, by browsing: `http://nginx.superset.savvybi.enterprises`
 
