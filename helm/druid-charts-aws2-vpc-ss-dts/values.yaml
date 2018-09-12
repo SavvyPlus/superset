@@ -33,7 +33,7 @@ nodes:
       name: druid-coordinator-service
       type: LoadBalancer
       ports:
-        - name: coordinator-port
+        - name: coord-port
           port: 8081
   overlord:
     name: "overlord"
