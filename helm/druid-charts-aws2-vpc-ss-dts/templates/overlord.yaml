@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    k8s-app: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    k8s-app: druid-overlord
   name: {{ .Values.nodes.overlord.service.name }}
   #TODO flexible service Name, configMap
   annotations:
@@ -28,7 +28,7 @@ spec:
       targetPort: overlord-port
   selector:
     #name: "{{ .Chart.Name }}-{{ .Values.nodes.overlord.name }}-rc"
-    k8s-app: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    k8s-app: druid-overlord
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -39,14 +39,14 @@ metadata:
 spec:
   selector:
     matchLabels:
-      k8s-app: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+      k8s-app: druid-overlord
   replicas: {{ .Values.nodes.overlord.replicaCount }}
   template:
     metadata:
       labels:
         name: "{{ .Chart.Name }}-{{ .Values.nodes.overlord.name }}-rc"
         app: {{ template "fullname" . }}
-        k8s-app: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        k8s-app: druid-overlord
     spec:
       containers:
       - name: "{{ .Chart.Name }}-{{ .Values.nodes.overlord.name }}"

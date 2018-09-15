@@ -1,16 +1,52 @@
-apiVersion: extensions/v1beta1
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    k8s-app: druid-historical
+  name: {{ .Values.nodes.historical.service.name }}
+  #TODO flexible service Name, configMap
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: druid-historical.aws2-vpc-ss-dts.savvybi.enterprises
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:ap-southeast-2:547051082101:certificate/72dfd182-e87c-4b6b-803f-a12af7f1c4c0
+spec:
+  type: {{ .Values.nodes.historical.service.type }}
+  ports:
+    {{range .Values.nodes.historical.service.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+    {{end}}
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: historical-port
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: historical-port
+  selector:
+    #name: "{{ .Chart.Name }}-{{ .Values.nodes.historical.name }}-rc"
+    k8s-app: druid-historical
+---
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "{{ .Chart.Name }}-{{ .Values.nodes.historical.name }}-deployment"
   labels:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
+  selector:
+    matchLabels:
+      k8s-app: druid-historical
   replicas: {{ .Values.nodes.historical.replicaCount }}
   template:
     metadata:
       labels:
         name: "{{ .Chart.Name }}-{{ .Values.nodes.historical.name }}-rc"
         app: {{ template "fullname" . }}
+        k8s-app: druid-historical
     spec:
       containers:
       - name: "{{ .Chart.Name }}-{{ .Values.nodes.historical.name }}"
@@ -62,20 +98,3 @@ spec:
       resources:
         requests:
           storage: 10Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Values.nodes.historical.service.name }}
-  #TODO flexible service Name, configMap
-  labels:
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-spec:
-  type: {{ .Values.nodes.historical.service.type }}
-  ports:
-  {{range .Values.nodes.historical.service.ports }}
-  - name: {{ .name }}
-    port: {{ .port }}
-  {{end}}
-  selector:
-    name: "{{ .Chart.Name }}-{{ .Values.nodes.historical.name }}-rc"

@@ -7,13 +7,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      k8s-app: {{ .Values.nodes.middlemanager.service.name }}
+      k8s-app: druid-middlemanager
   serviceName: {{ .Values.nodes.middlemanager.service.name }}
   replicas: {{ .Values.nodes.middlemanager.replicaCount }}
   template:
     metadata:
       labels:
-        k8s-app: {{ .Values.nodes.middlemanager.service.name }}
+        k8s-app: druid-middlemanager
         name: {{ .Values.nodes.middlemanager.service.name }}
       annotations:
         pod.alpha.kubernetes.io/initialized: "true"

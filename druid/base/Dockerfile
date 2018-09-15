@@ -11,6 +11,10 @@ ENV JAVA_HOME /usr/lib/jvm/openjdk-8
 ADD base/run.sh /opt/druid/bin
 ADD base/log4j2.xml /opt/druid/lib
 ADD base/avatica-core-1.12.0.jar /opt/druid/lib
+ADD base/wikiticker-index-new.json /opt/druid/quickstart
 
 WORKDIR /opt/druid
+RUN /opt/druid/bin/init
+RUN chmod -R 777 /opt/druid/var
+RUN chmod -R 777 /opt/druid/log
 ENTRYPOINT bash

@@ -57,7 +57,7 @@ nodes:
       pullPolicy: Always
     service:
       name: druid-historical-service
-      type: ClusterIP
+      type: LoadBalancer
       ports:
         - name: historical-port
           port: 8083
@@ -70,7 +70,7 @@ nodes:
       pullPolicy: Always
     service:
       name: druid-broker-service
-      type: NodePort
+      type: LoadBalancer
       ports:
         - name: broker-port
           port: 8082

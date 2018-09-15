@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    k8s-app: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    k8s-app: druid-coordinator
   name: {{ .Values.nodes.coordinator.service.name }}
   #TODO flexible service Name, configMap
   annotations:
@@ -28,7 +28,7 @@ spec:
       targetPort: coord-port
   selector:
     #name: "{{ .Chart.Name }}-{{ .Values.nodes.coordinator.name }}-rc"
-    k8s-app: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    k8s-app: druid-coordinator
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -39,14 +39,14 @@ metadata:
 spec:
   selector:
     matchLabels:
-      k8s-app: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+      k8s-app: druid-coordinator
   replicas: {{ .Values.nodes.coordinator.replicaCount }}
   template:
     metadata:
       labels:
         name: "{{ .Chart.Name }}-{{ .Values.nodes.coordinator.name }}-rc"
         app: {{ template "fullname" . }}
-        k8s-app: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        k8s-app: druid-coordinator
     spec:
       containers:
       - name: "{{ .Chart.Name }}-{{ .Values.nodes.coordinator.name }}"
