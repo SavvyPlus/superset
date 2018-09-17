@@ -1,0 +1,76 @@
+{
+  "type" : "index",
+  "spec" : {
+    "dataSchema" : {
+      "dataSource" : "seattle-weather",
+      "parser" : {
+        "type" : "string",
+        "parseSpec" : {
+          "format" : "csv",
+          "timestampSpec": {
+            "column": "date",
+            "format": "yyyy-mm-dd"
+          },
+          "columns": [
+           "date",
+           "actual_mean_temp",
+           "actual_min_temp",
+           "actual_max_temp",
+           "average_mean_temp",
+           "average_min_temp",
+           "average_max_temp",
+           "record_mean_temp",
+           "record_min_temp",
+           "record_max_temp",
+           "actual_precipitation",
+           "average_precipitation",
+           "record_precipitation"
+         ],
+         "dimensionsSpec": {
+           "dimensions": [
+             "actual_mean_temp",
+             "actual_min_temp",
+             "actual_max_temp",
+             "average_mean_temp",
+             "average_min_temp",
+             "average_max_temp",
+             "record_mean_temp",
+             "record_min_temp",
+             "record_max_temp",
+             "actual_precipitation",
+             "average_precipitation",
+             "record_precipitation"
+           ]
+         }
+        }
+      },
+      "metricsSpec" : [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "granularitySpec" : {
+        "type" : "uniform",
+        "segmentGranularity" : "day",
+        "queryGranularity" : "none",
+        "intervals" : ["2014-07-01/2015-07-01"],
+        "rollup" : false
+      }
+    },
+    "ioConfig" : {
+      "type" : "index",
+      "firehose" : {
+        "type" : "http",
+        "uris": ["https://s3-ap-southeast-2.amazonaws.com/druid.dts.input-bucket/KSEA.csv"]
+      },
+      "appendToExisting" : false
+    },
+    "tuningConfig" : {
+      "type" : "index",
+      "targetPartitionSize" : 5000000,
+      "maxRowsInMemory" : 25000,
+      "forceExtendableShardSpecs" : true
+    }
+  }
+}
