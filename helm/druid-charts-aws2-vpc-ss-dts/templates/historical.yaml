@@ -6,11 +6,6 @@ metadata:
     k8s-app: druid-historical
   name: {{ .Values.nodes.historical.service.name }}
   #TODO flexible service Name, configMap
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: druid-historical.aws2-vpc-ss-dts.savvybi.enterprises
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
-    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:ap-southeast-2:547051082101:certificate/72dfd182-e87c-4b6b-803f-a12af7f1c4c0
 spec:
   type: {{ .Values.nodes.historical.service.type }}
   ports:
@@ -18,14 +13,6 @@ spec:
     - name: {{ .name }}
       port: {{ .port }}
     {{end}}
-    - name: https
-      protocol: TCP
-      port: 443
-      targetPort: historical-port
-    - name: http
-      protocol: TCP
-      port: 80
-      targetPort: historical-port
   selector:
     #name: "{{ .Chart.Name }}-{{ .Values.nodes.historical.name }}-rc"
     k8s-app: druid-historical
