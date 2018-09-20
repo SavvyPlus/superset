@@ -70,7 +70,7 @@ nodes:
       pullPolicy: Always
     service:
       name: druid-broker-service
-      type: LoadBalancer
+      type: NodePort
       ports:
         - name: broker-port
           port: 8082
