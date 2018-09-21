@@ -55,6 +55,7 @@ spec:
         ports:
         {{range .Values.nodes.coordinator.service.ports }}
           - containerPort: {{ .port }}
+            name: coord-port
         {{end}}
         volumeMounts:
         - name: config-volume

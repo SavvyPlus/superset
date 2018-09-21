@@ -55,6 +55,7 @@ spec:
         ports:
         {{range .Values.nodes.overlord.service.ports }}
           - containerPort: {{ .port }}
+            name: overlord-port
         {{end}}
         volumeMounts:
         - name: config-volume
