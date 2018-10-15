@@ -2,7 +2,7 @@
   "type" : "index",
   "spec" : {
     "dataSchema" : {
-      "dataSource" : "seattle-weather",
+      "dataSource" : "seattle-weather-non-secure",
       "parser" : {
         "type" : "string",
         "parseSpec" : {

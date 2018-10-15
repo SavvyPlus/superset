@@ -105,7 +105,7 @@ From the top level of the git repository
 
 1. Wait for 5-10 minutes and then check that ExternalDNS has correctly created a new DNS entry in Route53, by browsing: `http://nginx.aws2-vpc-ss-dts.savvybi.enterprises`
 
-## Deploying superset application
+## Deploying superset infrastructure
 
 From the top level of the git repository
 
@@ -236,3 +236,217 @@ From the top level of the git repository
 1. From inside the superset-cluster-kops docker container, run the following
 1. `kops export kubecfg --name=${NAME}`
 1. `kops delete cluster --name ${NAME} --yes`
+
+## Access Athena
+awsathena+jdbc://AKIAJXAX7LVPJX3P52PA:FGhSZ4hVR02Omj87ZAch+4fABtrJZQFciPtawFhP@athena.ap-southeast-2.amazonaws.com/market_report?s3_staging_dir=s3%3A%2F%2Faws-athena-query-results-547051082101-ap-southeast-2%2F
+
+## Ingesting data into Druid
+Druid supports many methods of [ingesting data](http://druid.io/docs/latest/ingestion/firehose.html)
+
+The simplest method for our AWS configuration is to use an S3 bucket as a static 'website' and use the `HttpFirehose` to load our data.
+
+### Loading a single file
+To load a single file requires:
+1. The file to be available in the druid.dts.input-bucket ie: https://s3-ap-southeast-2.amazonaws.com/druid.dts.input-bucket/<file>
+1. An ingestion spec file needs to be created - an example of an ingestion spec is below
+```
+{
+  "type" : "index",
+  "spec" : {
+    "dataSchema" : {
+      "dataSource" : "seattle-weather-non-secure",
+      "parser" : {
+        "type" : "string",
+        "parseSpec" : {
+          "format" : "csv",
+          "timestampSpec": {
+            "column": "date",
+            "format": "yyyy-mm-dd"
+          },
+          "columns": [
+           "date",
+           "actual_mean_temp",
+           "actual_min_temp",
+           "actual_max_temp",
+           "average_mean_temp",
+           "average_min_temp",
+           "average_max_temp",
+           "record_mean_temp",
+           "record_min_temp",
+           "record_max_temp",
+           "actual_precipitation",
+           "average_precipitation",
+           "record_precipitation"
+         ],
+         "dimensionsSpec": {
+           "dimensions": [
+             "actual_mean_temp",
+             "actual_min_temp",
+             "actual_max_temp",
+             "average_mean_temp",
+             "average_min_temp",
+             "average_max_temp",
+             "record_mean_temp",
+             "record_min_temp",
+             "record_max_temp",
+             "actual_precipitation",
+             "average_precipitation",
+             "record_precipitation"
+           ]
+         }
+        }
+      },
+      "metricsSpec" : [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "granularitySpec" : {
+        "type" : "uniform",
+        "segmentGranularity" : "day",
+        "queryGranularity" : "none",
+        "intervals" : ["2014-07-01/2015-07-01"],
+        "rollup" : false
+      }
+    },
+    "ioConfig" : {
+      "type" : "index",
+      "firehose" : {
+        "type" : "http",
+        "uris": ["https://s3-ap-southeast-2.amazonaws.com/druid.dts.input-bucket/KSEA.csv"]
+      },
+      "appendToExisting" : false
+    },
+    "tuningConfig" : {
+      "type" : "index",
+      "targetPartitionSize" : 5000000,
+      "maxRowsInMemory" : 25000,
+      "forceExtendableShardSpecs" : true
+    }
+  }
+}
+```
+1. Then post the ingestion spec to the druid overlord node: `curl -X 'POST' -H 'Content-Type:application/json' -d @/home/kev/projects/superset-cluster/superset-app/ksea-index-http.json http://druid-overlord.aws2-vpc-ss-dts.savvybi.enterprises:8090/druid/indexer/v1/task `
+
+### Loading multiple files
+To load multiple files we still need to be able to load from an S3 bucket - this time add a folder into the `druid.dts.input-bucket` to hold the multiple files
+
+Once the files are in the correct place, we need to dynamically create all the ingestion specs for the files in the bucket. To do this we need to know the exact fields of the files that we are going to ingest.
+
+To dynamically generate the ingestion specs we use a template file with a paramter for the s3 key (filename)
+```
+{
+  "type" : "index",
+  "spec" : {
+    "dataSchema" : {
+      "dataSource" : "forward_prices",
+      "parser" : {
+        "type" : "string",
+        "parseSpec" : {
+          "format" : "csv",
+          "timestampSpec": {
+            "column": "settlement_date",
+            "format": "yyyy-mm-dd"
+          },
+          "columns": [
+            "settlement_date",
+            "period_type",
+            "period",
+            "region",
+            "profile",
+            "product",
+            "period_year",
+            "description",
+            "volume",
+            "settlement_price",
+            "moving_average",
+            "standard_deviation"
+         ],
+         "dimensionsSpec": {
+           "dimensions": [
+             "period_type",
+             "period",
+             "region",
+             "profile",
+             "product",
+             "period_year",
+             "settlement_price",
+             "moving_average",
+             "standard_deviation"
+           ]
+         }
+        }
+      },
+      "granularitySpec" : {
+        "type" : "uniform",
+        "segmentGranularity" : "day",
+        "queryGranularity" : "none",
+        "intervals" : ["2015-04-28/2018-09-14"],
+        "rollup" : false
+      }
+    },
+    "ioConfig" : {
+      "type" : "index",
+      "firehose" : {
+        "type" : "http",
+        "uris": ["https://s3-ap-southeast-2.amazonaws.com/druid.dts.input-bucket/{{csv_file_name}}"]
+      },
+      "appendToExisting" : false
+    },
+    "tuningConfig" : {
+      "type" : "index",
+      "targetPartitionSize" : 5000000,
+      "maxRowsInMemory" : 25000,
+      "forceExtendableShardSpecs" : true
+    }
+  }
+}
+```
+
+When you have the format of the data defined in the ingestion spec template, then the python script `generate_ingestion_specs.py` can be executed to both dynamically create the ingestion specs and to push them to the `druid-overlord` server for ingestion:
+```
+import boto3
+import jinja2
+import os
+import requests
+
+s3 = boto3.resource('s3')
+TEMPLATE_FILE = "forward_prices.json.j2"
+druid_overlord_url = "http://druid-overlord.aws2-vpc-ss-dts.savvybi.enterprises:8090/druid/indexer/v1/task"
+
+if __name__ == '__main__':
+    templateLoader = jinja2.FileSystemLoader(searchpath="./")
+    templateEnv = jinja2.Environment(loader=templateLoader)
+    template = templateEnv.get_template(TEMPLATE_FILE)
+
+    my_bucket = s3.Bucket('druid.dts.input-bucket')
+
+    output_dir = "/tmp/ingestion_specs"
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
+    for awsfile in my_bucket.objects.filter(Prefix='mkt_ASX_Forward_Prices'):
+        print(awsfile.key)
+
+        outputText = template.render(csv_file_name=awsfile.key)
+        out_name = awsfile.key.split('/')[1]
+        out_name = out_name.replace('-', '_')
+
+        print(outputText)
+        with open("/tmp/ingestion_specs/%s.json" % (out_name,), "w") as output_file:
+            output_file.write(outputText)
+
+    print("ingestion specs created..")
+
+    #curl -X 'POST' -H 'Content-Type:application/json' -d @superset-app/market-data-test.json http://druid-overlord.aws2-vpc-ss-dts.savvybi.enterprises:8090/druid/indexer/v1/task
+    for f in os.listdir(output_dir):
+        if os.path.isfile(os.path.join(output_dir, f)):
+            spec_name = f
+            print("posting: %s", (spec_name,))
+
+            with open("/tmp/ingestion_specs/%s" % (spec_name,), 'rb') as f:
+                #print(f.read())
+                r = requests.post(druid_overlord_url, headers={'Content-Type':'application/json'}, data=f.read())
+                print(r.text)
+```
