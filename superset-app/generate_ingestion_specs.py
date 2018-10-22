@@ -47,12 +47,12 @@ if __name__ == '__main__':
             output_file.write(outputText)
 
     print("ingestion specs created..")
-    
+
     #curl -X 'POST' -H 'Content-Type:application/json' -d @superset-app/market-data-test.json http://druid-overlord.aws2-vpc-ss-dts.savvybi.enterprises:8090/druid/indexer/v1/task
     for f in os.listdir(output_dir):
         if os.path.isfile(os.path.join(output_dir, f)):
             spec_name = f
-            print("posting: %s", (spec_name,))
+            print("posting: %s" % (spec_name,))
 
             with open("/tmp/ingestion_specs/%s" % (spec_name,), 'rb') as f:
                 #print(f.read())
