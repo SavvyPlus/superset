@@ -1,0 +1,37 @@
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: superset
+  name: superset
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8088
+      protocol: TCP
+      targetPort: http
+      name: http
+  selector:
+    k8s-app: superset
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: superset
+spec:
+  selector:
+    matchLabels:
+      k8s-app: superset
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: superset
+    spec:
+      containers:
+        - name: superset
+          imagePullPolicy: Always
+          image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/superset-app:production
+          ports:
+          - containerPort: 8088
+            name: http
