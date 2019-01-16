@@ -1,0 +1,20 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: celery-worker
+  labels:
+    deployment: celery-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: celery-worker
+  template:
+    metadata:
+      labels:
+        pod: celery-worker
+    spec:
+      containers:
+        - name: celery-worker
+          image: 547051082101.dkr.ecr.us-west-2.amazonaws.com/zawee/superset-app:production
+          command: ['celery', '-A', 'superset.sql_lab:celery_app', 'worker', '-l', 'info', '-P', 'gevent']

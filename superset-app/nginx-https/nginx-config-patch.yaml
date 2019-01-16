@@ -1,0 +1,21 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-configuration
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+data:
+  use-proxy-protocol: "true"
+  http-snippet: |
+    map '' $pass_access_scheme {
+       default          https;
+    }
+    map '' $pass_port {
+        default          443;
+    }
+    server {
+      listen 8088 proxy_protocol;
+      return 301 https://$host$request_uri;
+    }

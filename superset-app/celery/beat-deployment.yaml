@@ -1,0 +1,20 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: celery-beat
+  labels:
+    deployment: celery-beat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: celery-beat
+  template:
+    metadata:
+      labels:
+        pod: celery-beat
+    spec:
+      containers:
+        - name: celery-beat
+          image: 547051082101.dkr.ecr.us-west-2.amazonaws.com/zawee/superset-app:production
+          command: ['celery', '-A', 'superset.sql_lab:celery_app', 'beat', '-l', 'debug']
