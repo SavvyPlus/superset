@@ -1,11 +1,16 @@
 pipeline {
-    agent {
-        label 'Production'
-    }
+    agent any
     stages {
         stage('Build') {            
             steps {                
-                echo 'Building'            
+                 script {
+                 docker.withTool('docker_jx') {
+                   sh '''
+                        cd superset-app
+                        ./create-superset-image.sh
+                    '''
+                 }
+               }
             }        
         }        
         stage('Test') {            
@@ -15,7 +20,7 @@ pipeline {
         }
         stage('Deploy - Staging') {            
             steps {                
-                echo 'deploy'         
+                echo 'deploy'
             }        
         }        
         stage('Sanity check') {            
