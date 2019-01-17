@@ -6,6 +6,7 @@ pipeline {
                  script {
                  docker.withTool('docker_jx') {
                    sh '''
+                        #!/bin/bash -ilex
                         cd superset-app
                         ./create-superset-image.sh
                     '''
