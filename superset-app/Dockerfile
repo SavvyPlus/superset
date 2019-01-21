@@ -12,29 +12,23 @@ RUN apt-get update && apt-get install -y build-essential libssl-dev libffi-dev p
 RUN pip3 install --upgrade setuptools pip
 RUN pip3 install gevent "PyAthenaJDBC>=2.0.0" "PyAthenaJDBC[SQLAlchemy]>1.0.9" pymssql mysqlclient psycopg2-binary
 
-
 # remove any previously installed version of click
 RUN pip3 uninstall click
 RUN VER=${VERSION} git clone -b SavvyBI_Staging --single-branch --depth=1 git://github.com/SavvyPlus/incubator-superset /tmp/savvy-superset && rm -rf /tmp/savvy-superset/.git
 WORKDIR /tmp/savvy-superset/superset/assets
 RUN yarn && yarn build
 WORKDIR /tmp/savvy-superset
+RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements-dev.txt
 RUN pip3 install -e /tmp/savvy-superset
 
 # Install Java
-ENV JAVA_HOME       /usr/lib/jvm/java-8-oracle
+RUN  apt-get update && \
+  yes | apt-get install default-jre && \
+  yes | apt-get install default-jdk && \
+  yes | apt-get install openjdk-11-jdk
 
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends locales && \
-  locale-gen en_US.UTF-8 && \
-  apt-get dist-upgrade -y && \
-  apt-get --purge remove openjdk* && \
-  echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections && \
-  echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" > /etc/apt/sources.list.d/webupd8team-java-trusty.list && \
-  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886 && \
-  apt-get update && \
-  apt-get install -y --no-install-recommends oracle-java8-installer oracle-java8-set-default && \
-  apt-get clean all
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/bin/
 
 #Samba JDBC Driver Installation
 RUN mkdir -p /tmp/simba-driver
