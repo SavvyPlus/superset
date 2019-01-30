@@ -14,7 +14,7 @@ RUN pip3 install gevent "PyAthenaJDBC>=2.0.0" "PyAthenaJDBC[SQLAlchemy]>1.0.9" p
 
 # remove any previously installed version of click
 RUN pip3 uninstall click
-RUN VER=${VERSION} git clone -b SavvyBI_Staging --single-branch --depth=1 git://github.com/SavvyPlus/incubator-superset /tmp/savvy-superset && rm -rf /tmp/savvy-superset/.git
+RUN VER=${VERSION} git clone -b SavvyBI_SolarBI --single-branch --depth=1 git://github.com/SavvyPlus/incubator-superset /tmp/savvy-superset && rm -rf /tmp/savvy-superset/.git
 WORKDIR /tmp/savvy-superset/superset/assets
 RUN yarn && yarn build
 WORKDIR /tmp/savvy-superset
