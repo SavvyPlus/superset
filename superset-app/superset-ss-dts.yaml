@@ -5,7 +5,6 @@ metadata:
     k8s-app: superset
   name: superset
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: solarbi.zawee.io
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
 spec:
   type: LoadBalancer
@@ -34,7 +33,7 @@ spec:
       containers:
         - name: superset
           imagePullPolicy: Always
-          image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/zawee/superset-app:production
+          image: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/solarbi/superset-app:production
           ports:
           - containerPort: 8088
             name: backend-http

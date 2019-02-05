@@ -1,5 +1,5 @@
 #!/bin/bash
-LATEST_VERSION=$(sudo docker images --format "{{.Tag}}" zawee/superset-app | sed 's/-dev$//')
+LATEST_VERSION=$(sudo docker images --format "{{.Tag}}" solarbi/superset-app | sed 's/-dev$//')
 echo $LATEST_VERSION
 if [ -z "${LATEST_VERSION:+x}" ]; then
   echo "VERSION not set, using 1-dev";
@@ -16,10 +16,10 @@ DOCKER_LOGIN=$(aws ecr get-login --no-include-email --region=ap-southeast-2)
 sudo $DOCKER_LOGIN
 
 echo "Docker Build"
-sudo docker build --build-arg VER=${VERSION} --rm . -t zawee/superset-app:${VERSION} -t ${AWS_ACCOUNT_ID}.dkr.ecr.ap-southeast-2.amazonaws.com/zawee/superset-app:${VERSION} -t ${AWS_ACCOUNT_ID}.dkr.ecr.ap-southeast-2.amazonaws.com/zawee/superset-app:production
+sudo docker build --build-arg VER=${VERSION} --rm . -t solarbi/superset-app:${VERSION} -t ${AWS_ACCOUNT_ID}.dkr.ecr.ap-southeast-2.amazonaws.com/solarbi/superset-app:${VERSION} -t ${AWS_ACCOUNT_ID}.dkr.ecr.ap-southeast-2.amazonaws.com/solarbi/superset-app:production
 
 echo "Creating ECR repository: zawee/superset-app"
-aws ecr create-repository --region=ap-southeast-2 --repository-name zawee/superset-app ||:
+aws ecr create-repository --region=ap-southeast-2 --repository-name solarbi/superset-app ||:
 
 echo "Pushing image to ECR"
-sudo docker push ${AWS_ACCOUNT_ID}.dkr.ecr.ap-southeast-2.amazonaws.com/zawee/superset-app
+sudo docker push ${AWS_ACCOUNT_ID}.dkr.ecr.ap-southeast-2.amazonaws.com/solarbi/superset-app
