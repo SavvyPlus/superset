@@ -14,7 +14,7 @@ RUN pip3 install gevent "PyAthenaJDBC>=2.0.0" "PyAthenaJDBC[SQLAlchemy]>1.0.9" p
 
 # remove any previously installed version of click
 RUN pip3 uninstall click
-RUN VER=${VERSION} git clone -b SavvyBI_Staging --single-branch --depth=1 git://github.com/SavvyPlus/incubator-superset /tmp/savvy-superset && rm -rf /tmp/savvy-superset/.git
+RUN VER=${VERSION} git clone -b SavvyBI_S --single-branch --depth=1 git://github.com/SavvyPlus/incubator-superset /tmp/savvy-superset && rm -rf /tmp/savvy-superset/.git
 WORKDIR /tmp/savvy-superset/superset/assets
 RUN yarn && yarn build
 WORKDIR /tmp/savvy-superset
@@ -40,7 +40,7 @@ ENV CLASSPATH /tmp/simba-driver
 # superset configuration/setup
 ADD superset_admin.config /tmp/superset_admin.config
 RUN export LC_ALL=C.UTF-8 && fabmanager create-admin --app superset < /tmp/superset_admin.config
-RUN export LC_ALL=C.UTF-8 && superset db upgrade && superset load_examples && superset init
+RUN export LC_ALL=C.UTF-8 && superset db upgrade && superset init
 EXPOSE 8088/tcp
 CMD gunicorn -w 10 -k gevent --timeout 300 -b 0.0.0.0:8088 --limit-request-line 0 --limit-request-field_size 0 superset:app
 

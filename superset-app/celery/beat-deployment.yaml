@@ -16,5 +16,5 @@ spec:
     spec:
       containers:
         - name: celery-beat
-          image: 547051082101.dkr.ecr.us-west-2.amazonaws.com/zawee/superset-app:production
+          image: 547051082101.dkr.ecr.us-west-2.amazonaws.com/savvybi/superset-app:production
           command: ['celery', '-A', 'superset.sql_lab:celery_app', 'beat', '-l', 'debug']
