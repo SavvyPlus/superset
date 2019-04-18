@@ -182,7 +182,7 @@ From the top level of the git repository
 1. From inside the superset-cluster-kops docker container, run the following
 1. `/files/k8s/env-dts.sh`
 1. Make sure the cluster is up and running: `kops validate cluster`
-1. `helm install /files/helm/druid-charts-aws-vpc-ss-dts/`
+1. `helm install /files/helm/druid-charts-aws2-vpc-ss-dts/`
 
 ## Deploying new versions of the superset application
 To deploy code from the superset github repository at: https://github.com/SavvyPlus/incubator-superset
