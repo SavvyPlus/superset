@@ -166,6 +166,13 @@ Resources:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_MEDIUM
         Image: aws/codebuild/docker:18.09.0
+        EnvironmentVariables:
+          -
+            Name: "TASK_COUNT"
+            Value: !Ref ContainersPerRegion
+          -
+            Name: "REGION_1"
+            Value: !Ref 'AWS::Region'
       Name: BuildSuperset
       ServiceRole: !GetAtt  
         - CodeBuildRole 
