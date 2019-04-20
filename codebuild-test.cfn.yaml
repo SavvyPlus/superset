@@ -1,0 +1,236 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Test codebuild, fetch tag'
+Parameters: 
+  ArtifactBucket: 
+    Type: String  
+    Default: dex-ss-pipeline-bucket  
+    Description: Name of existing S3 bucket for storing pipeline artifacts 
+  PipelineName: 
+    Type: String  
+    Description: Name of the pipeline to create 
+    Default: dex-ss-Pipeline  
+  GitHubOwner:  
+    Type: String  
+    Default: SavvyPlus  
+    Description: GitHub Repository Owner  
+  GitHubToken:  
+    Type: String  
+    Default: 0eda8d9f7b3bca6e5b2e4d5a10048a8407211c0a 
+    Description: GitHub repo OAuth token
+  SourceGitHubRepo: 
+    Type: String  
+    Default: incubator-superset
+    Description: GitHub repo name 
+  SourceGitHubBranch: 
+    Type: String  
+    Default: SavvyBI_S_Dex
+    Description: GitHub repo branch 
+  SpecGitHubRepo: 
+    Type: String  
+    Default: superset
+    Description: GitHub repo name 
+  SpecGitHubBranch:
+    Type: String  
+    Default: dex_codepipeline
+    Description: GitHub repo branch
+Resources: 
+  CFNRole:  
+    Type: 'AWS::IAM::Role'  
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Statement:  
+          - Action: 
+              - 'sts:AssumeRole'  
+            Effect: Allow 
+            Principal:  
+              Service:  
+                - cloudformation.amazonaws.com  
+        Version: 2012-10-17 
+      Path: / 
+      Policies: 
+        - PolicyName: CloudFormationRole  
+          PolicyDocument: 
+            Version: 2012-10-17 
+            Statement:  
+              - Action: 
+                  - 'ec2:*' 
+                  - 's3:*'  
+                  - 'sns:*' 
+                  - 'iam:*' 
+                  - 'lambda:*'  
+                  - 'dynamodb:*'  
+                  - 'glue:*'  
+                Effect: Allow 
+                Resource: '*' 
+
+  PipelineRole:  
+    Type: 'AWS::IAM::Role'  
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Statement:  
+          - Action: 
+              - 'sts:AssumeRole'  
+            Effect: Allow 
+            Principal:  
+              Service:  
+                - codepipeline.amazonaws.com  
+        Version: 2012-10-17 
+      Path: / 
+      Policies: 
+        - PolicyName: CodePipelineAccess  
+          PolicyDocument: 
+            Version: 2012-10-17 
+            Statement:  
+              - Action: 
+                  - 's3:*'  
+                  - 'cloudformation:CreateStack'  
+                  - 'cloudformation:DescribeStacks' 
+                  - 'cloudformation:DeleteStack'  
+                  - 'cloudformation:UpdateStack'  
+                  - 'cloudformation:CreateChangeSet'  
+                  - 'cloudformation:ExecuteChangeSet' 
+                  - 'cloudformation:DeleteChangeSet'  
+                  - 'cloudformation:DescribeChangeSet'  
+                  - 'cloudformation:SetStackPolicy' 
+                  - 'codebuild:StartBuild'  
+                  - 'codebuild:BatchGetBuilds'  
+                  - 'iam:PassRole'  
+                  - 'sns:Publish' 
+                Effect: Allow 
+                Resource: '*' 
+
+  CloudFormationRole:  
+    Type: 'AWS::IAM::Role'  
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17 
+        Statement:  
+          - Effect: Allow 
+            Action: 
+              - 'sts:AssumeRole'  
+            Principal:  
+              Service:  
+                - cloudformation.amazonaws.com  
+      ManagedPolicyArns:  
+        - 'arn:aws:iam::aws:policy/AdministratorAccess' 
+
+  CodeBuildRole: 
+    Type: 'AWS::IAM::Role'  
+    DependsOn: CloudFormationRole 
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17 
+        Statement:  
+          - Effect: Allow 
+            Action: 
+              - 'sts:AssumeRole'  
+            Principal:  
+              Service:  
+                - codebuild.amazonaws.com 
+      Policies: 
+        - PolicyName: ServiceRole 
+          PolicyDocument: 
+            Version: 2012-10-17 
+            Statement:  
+              - Sid: CloudWatchWriteLogsPolicy  
+                Effect: Allow 
+                Action: 
+                  - 'logs:CreateLogGroup' 
+                  - 'logs:CreateLogStream'  
+                  - 'logs:PutLogEvents' 
+                Resource: '*' 
+              - Sid: S3GetObjectPolicy  
+                Effect: Allow 
+                Action: 
+                  - 's3:GetObject'  
+                  - 's3:GetObjectVersion' 
+                Resource: '*' 
+              - Sid: S3PutObjectPolicy  
+                Effect: Allow 
+                Action: 
+                  - 's3:PutObject'  
+                Resource: '*' 
+              - Sid: ECR  
+                Effect: Allow 
+                Action: 
+                  - 'ecr:*'
+                Resource: '*' 
+
+  CodeBuildSSTest: 
+    Type: 'AWS::CodeBuild::Project' 
+    DependsOn: CodeBuildRole
+    Properties: 
+      Artifacts:  
+        Type: CODEPIPELINE  
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Image: aws/codebuild/docker:18.09.0
+      Name: BuildSuperset
+      ServiceRole: !GetAtt  
+        - CodeBuildRole 
+        - Arn 
+      Source: 
+        Type: CODEPIPELINE  
+        BuildSpec: superset/superset-app/buildspec.yaml
+      TimeoutInMinutes: 10
+      Cache:  
+        Location: 'dex-etl-build-cache'
+        Type: S3  
+
+  Pipeline:  
+    Type: 'AWS::CodePipeline::Pipeline' 
+    Properties: 
+      RoleArn: !GetAtt  
+        - PipelineRole  
+        - Arn 
+      ArtifactStore:  
+        Type: S3  
+        Location: !Ref ArtifactBucket 
+      Name: !Ref PipelineName 
+      Stages: 
+        - Name: GitHubSource  
+          Actions:  
+            - Name: GetSource 
+              ActionTypeId: 
+                Category: Source  
+                Owner: ThirdParty 
+                Version: 1  
+                Provider: GitHub  
+              Configuration:  
+                Owner: !Ref GitHubOwner 
+                Repo: !Ref SourceGitHubRepo 
+                Branch: !Ref SourceGitHubBranch 
+                OAuthToken: !Ref GitHubToken  
+              OutputArtifacts:  
+                - Name: SourceCode  
+            - Name: GetSpec 
+              ActionTypeId: 
+                Category: Source  
+                Owner: ThirdParty 
+                Version: 1  
+                Provider: GitHub  
+              Configuration:  
+                Owner: !Ref GitHubOwner 
+                Repo: !Ref SpecGitHubRepo 
+                Branch: !Ref SpecGitHubBranch 
+                OAuthToken: !Ref GitHubToken  
+              OutputArtifacts:  
+                - Name: SpecCode  
+              RunOrder: 1
+
+        - Name: BuildSS  
+          Actions:  
+            - Name: BuildSS
+              ActionTypeId: 
+                Category: Build 
+                Owner: AWS  
+                Provider: CodeBuild 
+                Version: 1  
+              Configuration:  
+                ProjectName: !Ref CodeBuildSSTest
+              InputArtifacts: 
+                - Name: SpecCode   
+              OutputArtifacts:  
+                - Name: BuildSSOutput 
+
