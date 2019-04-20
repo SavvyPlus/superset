@@ -172,7 +172,7 @@ Resources:
         - Arn 
       Source: 
         Type: CODEPIPELINE  
-        BuildSpec: superset/superset-app/buildspec.yaml
+        BuildSpec: superset-app/buildspec.yaml
       TimeoutInMinutes: 10
       Cache:  
         Location: 'dex-etl-build-cache'
