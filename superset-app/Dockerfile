@@ -2,8 +2,10 @@ FROM ubuntu:latest
 MAINTAINER ykydxt@gmail.com
 ARG VER=unknown
 
+
 # superset configuration/setup
-RUN find . -name superset_admin.config
+RUN pwd
+RUN find / -name superset_admin.config
 RUN ls -a
 RUN ls /tmp
 ADD superset_admin.config superset_admin.config
