@@ -39,6 +39,7 @@ ENV CLASSPATH /tmp/simba-driver
 
 # superset configuration/setup
 RUN ls -a
+RUN ls /tmp
 ADD superset_admin.config superset_admin.config
 RUN export LC_ALL=C.UTF-8 && fabmanager create-admin --app superset < superset_admin.config
 RUN export LC_ALL=C.UTF-8 && superset db upgrade && superset init
