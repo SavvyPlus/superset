@@ -3,7 +3,7 @@ MAINTAINER ykydxt@gmail.com
 ARG VER=unknown
 
 # superset configuration/setup
-RUN pwd
+RUN /var/lib/docker/tmp/docker-builder435027835
 RUN ls ../
 RUN ls -a
 RUN ls /tmp
