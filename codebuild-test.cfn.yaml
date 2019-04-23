@@ -187,7 +187,7 @@ Resources:
       Source: 
         Type: CODEPIPELINE  
         BuildSpec: superset-app/buildspec.yml
-      TimeoutInMinutes: 10
+      TimeoutInMinutes: 30
       Cache:  
         Location: 'dex-etl-build-cache'
         Type: S3  
