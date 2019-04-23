@@ -4,7 +4,7 @@ ARG VER=unknown
 
 # superset configuration/setup
 RUN /var/lib/docker/tmp/docker-builder435027835
-RUN ls ../
+RUN find . -name superset_admin.config
 RUN ls -a
 RUN ls /tmp
 ADD superset_admin.config superset_admin.config
