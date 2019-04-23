@@ -3,7 +3,6 @@ MAINTAINER ykydxt@gmail.com
 ARG VER=unknown
 
 # superset configuration/setup
-RUN ls /var/lib/docker/tmp/docker-builder435027835
 RUN find . -name superset_admin.config
 RUN ls -a
 RUN ls /tmp
