@@ -171,8 +171,15 @@ Resources:
             Name: "TASK_COUNT"
             Value: !Ref ContainersPerRegion
           -
-            Name: "REGION_1"
+            Name: "REGION"
             Value: !Ref 'AWS::Region'
+          - 
+            Name: "IMAGE_REPO"
+            Value: !Ref 'savvybi-codepipeline'
+          - 
+            Name: "IMAGE_TAG"
+            Value: !Ref 'latest'
+
       Name: BuildSuperset
       ServiceRole: !GetAtt  
         - CodeBuildRole 
