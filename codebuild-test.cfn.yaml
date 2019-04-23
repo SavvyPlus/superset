@@ -167,18 +167,18 @@ Resources:
         ComputeType: BUILD_GENERAL1_MEDIUM
         Image: aws/codebuild/docker:18.09.0
         EnvironmentVariables:
-          -
-            Name: "TASK_COUNT"
-            Value: !Ref ContainersPerRegion
+          # -
+          #   Name: "TASK_COUNT"
+          #   Value: !Ref ContainersPerRegion
           -
             Name: "REGION"
             Value: !Ref 'AWS::Region'
           - 
             Name: "IMAGE_REPO"
-            Value: !Ref 'savvybi-codepipeline'
+            Value: 'savvybi-codepipeline'
           - 
             Name: "IMAGE_TAG"
-            Value: !Ref 'latest'
+            Value: 'latest'
 
       Name: BuildSuperset
       ServiceRole: !GetAtt  
