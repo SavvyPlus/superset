@@ -29,4 +29,5 @@ phases:
       # - docker push $REPOSITORY_URI:$IMAGE_TAG
 
 artifacts:
-  files: build.json
+  files: 
+    - build.json
