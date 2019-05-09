@@ -44,4 +44,4 @@ RUN export LC_ALL=C.UTF-8 && superset db upgrade && superset init
 RUN export FLASK_ENV=development
 
 EXPOSE 8088/tcp
-CMD gunicorn -w 10 -k gevent --log-level debug --timeout 300 -b 0.0.0.0:8088 --limit-request-line 0 --limit-request-field_size 0  superset:app
+CMD gunicorn -w 10 -k gevent --log-level debug --timeout 300 -b 0.0.0.0:8088 --limit-request-line 0 --limit-request-field_size 0 --log-file /app/logs/gunicorn.log  superset:app
