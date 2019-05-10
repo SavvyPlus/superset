@@ -1,20 +1,20 @@
-kind: Service
-apiVersion: v1
-metadata:
-  labels:
-    k8s-app: superset
-  name: superset
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
-spec:
-  type: LoadBalancer
-  ports:
-    - name: http
-      protocol: TCP
-      port: 80
-      targetPort: backend-http
-  selector:
-    k8s-app: superset
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   labels:
+#     k8s-app: superset
+#   name: superset
+#   annotations:
+#     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+# spec:
+#   type: LoadBalancer
+#   ports:
+#     - name: http
+#       protocol: TCP
+#       port: 80
+#       targetPort: backend-http
+#   selector:
+#     k8s-app: superset
 ---
 apiVersion: apps/v1
 kind: Deployment
