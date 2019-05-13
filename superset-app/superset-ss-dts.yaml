@@ -16,23 +16,26 @@
 #   selector:
 #     k8s-app: superset
 ---
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
-metadata:
+metadata: 
   name: superset
-spec:
-  selector:
-    matchLabels:
+spec: 
+  replicas: 2
+  selector: 
+    matchLabels: 
       k8s-app: superset
-  replicas: 1
-  template:
-    metadata:
-      labels:
+  template: 
+    metadata: 
+      labels: 
         k8s-app: superset
-    spec:
-      containers:
-        - name: superset
+    spec: 
+      containers: 
+        - 
+          image: $REPOSITORY_URI
           imagePullPolicy: Always
-          image: $REPOSITORY_URI:$TAG
-        - containerPort: 8088
-          name: backend-http
+          name: superset
+          ports: 
+            - 
+              containerPort: 8088
+              name: backend-http
