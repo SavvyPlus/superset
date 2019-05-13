@@ -34,5 +34,5 @@ spec:
         - name: superset
           imagePullPolicy: Always
           image: $REPOSITORY_URI:$TAG
-          - containerPort: 8088
-            name: backend-http
+        - containerPort: 8088
+          name: backend-http
