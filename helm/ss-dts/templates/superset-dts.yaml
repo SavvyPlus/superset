@@ -1,0 +1,46 @@
+kind: Service
+apiVersion: {{ .Values.savvybi.service.apiVersion}}
+metadata:
+  labels:
+    k8s-app: {{ .Values.savvybi.label }}
+  name: {{ .Values.savvybi.name }}
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+spec:
+  type: {{ .Values.savvybi.service.type }}
+  ports:
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: backend-http
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: backend-http
+  selector:
+    k8s-app: {{ .Values.savvybi.label }}
+---
+
+kind: Deployment
+apiVersion: {{ .Values.savvybi.deployment.apiVersion}}
+metadata:
+  name: {{ .Values.savvybi.name }}
+spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Values.savvybi.label }}
+  replicas: {{ .Values.savvybi.deployment.replicas }}
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ .Values.savvybi.label }}
+    spec:
+      containers:
+        - name: {{ .Values.savvybi.name }}
+          imagePullPolicy: {{ .Values.savvybi.deployment.image.pullPolicy}}
+          image: {{ .Values.savvybi.deployment.image.repository}}
+          ports:
+          {{ range .Values.savvybi.deployment.ports}}
+            - containerPort: {{ .port }}
+              name: {{ .name }}
+          {{ end }}

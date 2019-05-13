@@ -1,0 +1,31 @@
+# Default values for druid.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+savvybi:
+  name: superset
+  label: superset
+  service:
+    apiVersion: "v1"
+    type: LoadBalancer
+  deployment:
+    apiVersion: "apps/v1"
+    replicas: 1
+    image:
+      repository: 547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/savvybi/superset-app:production
+      pullPolicy: Always
+    ports:
+      - name: backend-http
+        port: 8088
+
+celery:
+  apiVersion: "apps/v1"
+  image: 
+  worker:
+    name: celery-worker
+    label: celery-worker
+    replicas: 1
+  beat:
+    name: celery-beat
+    label: celery-beat
+    replicas: 1

@@ -1,5 +1,5 @@
 #!/bin/bash
-LATEST_VERSION=$(sudo docker images --format "{{.Tag}}" savvybi/superset-app | sed 's/-dev$//')
+LATEST_VERSION=$(sudo docker images --format "{{.Tag}}" solarbi/superset-app | sed 's/-dev$//')
 echo $LATEST_VERSION
 if [ -z "${LATEST_VERSION:+x}" ]; then
   echo "VERSION not set, using 1-dev";
