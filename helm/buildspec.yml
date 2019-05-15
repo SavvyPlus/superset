@@ -24,7 +24,7 @@ phases:
       - tar xvf helm-v2.13.1-linux-amd64.tar.gz
       - sudo mv linux-amd64/helm /usr/local/bin/
       - helm version
-
+      - ls
       - kubectl create serviceaccount tiller --namespace kube-system  ||  kubectl apply -f rbac-config.yaml
       - kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller || helm init
       - kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
