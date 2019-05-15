@@ -12,7 +12,7 @@ phases:
       - echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
       - aws-iam-authenticator help
 
-      - aws eks update-kubeconfig --name savvybi-dex
+      - aws eks update-kubeconfig --name $clustername
 
       - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
       - curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl
