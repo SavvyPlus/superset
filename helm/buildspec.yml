@@ -30,4 +30,4 @@ phases:
       - kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 
       - ls -a ss-dts/
-      - helm install ss-dts | helm upgrade ss-dts
+      - helm install ss-dts || helm upgrade ss-dts
