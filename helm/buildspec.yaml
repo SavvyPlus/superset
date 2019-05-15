@@ -31,4 +31,4 @@ phases:
 
       - cd ..
       - ls -a ss-dts/
-      - helm install ss-dts || ls
+      - helm install ss-dts 
