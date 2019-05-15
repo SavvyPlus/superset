@@ -1,8 +1,11 @@
 version: 0.2
 
 phases:
-  PRE_BUILD:
+  pre_build:
     commands:
+      - mkdir ../ss-dts
+      - cp -r . ../ss-dts/
+
       - curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.12.7/2019-03-27/bin/linux/amd64/aws-iam-authenticator
       - chmod +x ./aws-iam-authenticator
       - mkdir -p $HOME/bin && cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$HOME/bin:$PATH
@@ -21,12 +24,11 @@ phases:
       - tar xvf helm-v2.13.1-linux-amd64.tar.gz
       - sudo mv linux-amd64/helm /usr/local/bin/
       - helm version
-  
-      - mkdir ss-dts
-      - cp -r helm/. ss-dts/
+      - ls
       - kubectl create serviceaccount tiller --namespace kube-system  ||  kubectl apply -f helm/rbac-config.yaml
       - kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller || helm init
       - kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 
+      - cd ..
       - ls -a ss-dts/
       - helm install ss-dts 
