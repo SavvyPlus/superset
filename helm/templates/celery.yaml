@@ -1,0 +1,43 @@
+apiVersion: {{ .Values.celery.apiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.celery.worker.name }}
+  labels:
+    deployment: {{ .Values.celery.worker.label }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: {{ .Values.celery.worker.label }}
+  template:
+    metadata:
+      labels:
+        pod: {{ .Values.celery.worker.label }}
+    spec:
+      containers:
+        - name: {{ .Values.celery.worker.name }}
+          image: {{ .Values.savvybi.deployment.image.repository }}
+          command: ['celery', '-A', 'superset.sql_lab:celery_app', 'worker', '-l', 'info', '-P', 'gevent']
+
+---
+
+apiVersion: {{ .Values.celery.apiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.celery.beat.name }}
+  labels:
+    deployment: {{ .Values.celery.beat.label }}
+spec:
+  replicas: {{ .Values.celery.beat.replicas }}
+  selector:
+    matchLabels:
+      pod: {{ .Values.celery.beat.label }}
+  template:
+    metadata:
+      labels:
+        pod: {{ .Values.celery.beat.label }}
+    spec:
+      containers:
+        - name: {{ .Values.celery.beat.name }}
+          image: {{ .Values.savvybi.deployment.image.repository }}
+          command: ['celery', '-A', 'superset.sql_lab:celery_app', 'beat', '-l', 'debug']

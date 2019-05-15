@@ -1,0 +1,7 @@
+apiVersion: v1
+description: A Helm chart for savvybi superset installation.
+name: savvybi
+version: 0.1.0
+maintainers:
+  - name: Kev Jackson
+    email: foamdino@gmail.com
