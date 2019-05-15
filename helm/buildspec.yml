@@ -1,12 +1,16 @@
 version: 0.2
 
 phases:
-  PRE_BUILD:
+  pre_build:
     commands:
+      - mkdir ss-dts
+      - cp -r helm/. ss-dts/
+
       - curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.12.7/2019-03-27/bin/linux/amd64/aws-iam-authenticator
       - chmod +x ./aws-iam-authenticator
       - mkdir -p $HOME/bin && cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$HOME/bin:$PATH
       - echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
+      - aws-iam-authenticator help
 
       - aws eks update-kubeconfig --name $CLUSTERNAME
 
@@ -14,16 +18,16 @@ phases:
       - curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl
       - chmod +x ./kubectl
       - sudo mv ./kubectl /usr/local/bin/kubectl
+      - kubectl version
 
       - wget "https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz"
       - tar xvf helm-v2.13.1-linux-amd64.tar.gz
       - sudo mv linux-amd64/helm /usr/local/bin/
+      - helm version
+      - ls
       - kubectl create serviceaccount tiller --namespace kube-system  ||  kubectl apply -f helm/rbac-config.yaml
       - kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller || helm init
       - kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
-
-      - mkdir ss-dts
-      - cp -r helm/. ss-dts/
 
       - ls -a ss-dts/
       - helm install ss-dts 
