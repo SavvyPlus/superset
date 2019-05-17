@@ -15,7 +15,7 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -f superset-app/Dockerfile -t $IMAGE_REPO:$IMAGE_BRANCH .
+      - docker build -f superset-app/Dockerfile .
       - docker tag $IMAGE_REPO:$IMAGE_BRANCH $REPOSITORY_URI     
 
 
