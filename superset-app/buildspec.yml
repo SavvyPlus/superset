@@ -8,7 +8,7 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - REPOSITORY_URI=547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/$IMAGE_REPO/$BRANCH:$IMAGE_BUILDID
+      - REPOSITORY_URI=547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/$IMAGE_REPO:$BRANCH-$IMAGE_BUILDID
 
   build:
     commands:
