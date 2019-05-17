@@ -4,18 +4,19 @@ phases:
   pre_build:
     commands:
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      - IMAGE_BUILDID=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      - IMAGE_BRANCH = $BRANCH
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - REPOSITORY_URI=547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/$IMAGE_REPO:$IMAGE_TAG
+      - REPOSITORY_URI=547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/$IMAGE_REPO:$IMAGE_BUILDID
 
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -f superset-app/Dockerfile -t $IMAGE_REPO:$IMAGE_TAG .
-      - docker tag $IMAGE_REPO:$IMAGE_TAG $REPOSITORY_URI     
+      - docker build -f superset-app/Dockerfile -t $IMAGE_REPO:$IMAGE_BRANCH .
+      - docker tag $IMAGE_REPO:$IMAGE_BRANCH $REPOSITORY_URI     
 
 
       # - docker build -t $REPOSITORY_URI:latest .
@@ -25,7 +26,7 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI
-      - printf '{"tag":"%s","repository-uri":"%s"}' $IMAGE_TAG $REPOSITORY_URI  > build.json
+      - printf '{"tag":"%s","repository-uri":"%s"}' $IMAGE_BUILDID $REPOSITORY_URI  > build.json
 
       # - docker push $REPOSITORY_URI:latest
       # - docker push $REPOSITORY_URI:$IMAGE_TAG
