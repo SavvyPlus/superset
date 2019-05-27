@@ -18,6 +18,13 @@ spec:
           image: $REPOSITORY_URI
           imagePullPolicy: Always
           name: superset
+          resources:
+            limits:
+              cpu: 500m
+              memory: 2000Mi
+            requests:
+              cpu: 300m
+              memory: 1500Mi
           ports: 
             - 
               containerPort: 8088
