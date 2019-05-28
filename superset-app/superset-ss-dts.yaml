@@ -4,7 +4,7 @@ kind: Deployment
 metadata: 
   name: superset
 spec: 
-  replicas: 2
+  replicas: 1
   selector: 
     matchLabels: 
       k8s-app: superset
@@ -20,10 +20,10 @@ spec:
           name: superset
           resources:
             limits:
-              cpu: 500m
+              cpu: 800m
               memory: 2000Mi
             requests:
-              cpu: 300m
+              cpu: 500m
               memory: 1500Mi
           ports: 
             - 
