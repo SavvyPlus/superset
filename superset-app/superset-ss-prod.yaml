@@ -4,7 +4,7 @@ kind: Deployment
 metadata: 
   name: superset
 spec: 
-  replicas: 1
+  replicas: 2
   selector: 
     matchLabels: 
       k8s-app: superset
