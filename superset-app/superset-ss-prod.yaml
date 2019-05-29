@@ -1,0 +1,31 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata: 
+  name: superset
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      k8s-app: superset
+  template: 
+    metadata: 
+      labels: 
+        k8s-app: superset
+    spec: 
+      containers: 
+        - 
+          image: $REPOSITORY_URI
+          imagePullPolicy: Always
+          name: superset
+          resources:
+            limits:
+              cpu: 1500m
+              memory: 2500Mi
+            requests:
+              cpu: 1000m
+              memory: 1500Mi
+          ports: 
+            - 
+              containerPort: 8088
+              name: backend-http
