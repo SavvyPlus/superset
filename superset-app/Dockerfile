@@ -1,46 +1,117 @@
-FROM ubuntu:latest
-MAINTAINER ykydxt@gmail.com
-ARG VER=unknown
-ARG branch
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-RUN apt-get update && apt-get install -y curl gnupg && apt-get purge cmdtest
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update && apt-get install -y build-essential libssl-dev libffi-dev python3-dev python3-pip libsasl2-dev libldap2-dev git libmysqlclient-dev nodejs curl yarn \
-  && cd /usr/local/bin \
-  && ln -s /usr/bin/python3 python
+######################################################################
+# PY stage that simply does a pip install on our requirements
+######################################################################
+ARG PY_VER=3.6.9
+FROM python:${PY_VER} AS superset-py
 
-RUN pip3 install --upgrade setuptools pip
-RUN pip3 install gevent "PyAthenaJDBC>=2.0.0" "PyAthenaJDBC[SQLAlchemy]>1.0.9" pymssql mysqlclient psycopg2-binary
+RUN mkdir /app \
+        && apt-get update -y \
+        && apt-get install -y --no-install-recommends \
+            build-essential \
+            default-libmysqlclient-dev \
+            libpq-dev \
+        && rm -rf /var/lib/apt/lists/*
 
-# remove any previously installed version of click
-RUN pip3 uninstall click
-RUN VER=${VERSION} git clone -b $branch --single-branch --depth=1 git://github.com/SavvyPlus/incubator-superset /tmp/savvy-superset && rm -rf /tmp/savvy-superset/.git
-WORKDIR /tmp/savvy-superset/superset/assets
-RUN yarn && yarn build
-WORKDIR /tmp/savvy-superset
-RUN pip3 install -r requirements.txt
-RUN pip3 install -r requirements-dev.txt
-RUN pip3 install -e /tmp/savvy-superset
+# First, we just wanna install requirements, which will allow us to utilize the cache
+# in order to only build if and only if requirements change
+COPY ./requirements.txt /app/
+RUN cd /app \
+        && pip install --no-cache -r requirements.txt
 
-# Install Java
-RUN  apt-get update && \
-  yes | apt-get install default-jre && \
-  yes | apt-get install default-jdk && \
-  yes | apt-get install openjdk-11-jdk
 
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/bin/
+######################################################################
+# Node stage to deal with static asset construction
+######################################################################
+FROM node:10-jessie AS superset-node
 
-#Samba JDBC Driver Installation
-RUN mkdir -p /tmp/simba-driver
-WORKDIR /tmp/simba-driver
-RUN apt-get install wget
-RUN wget https://s3.amazonaws.com/athena-downloads/drivers/JDBC/SimbaAthenaJDBC_2.0.5/AthenaJDBC42_2.0.5.jar
-ENV CLASSPATH /tmp/simba-driver
+# NPM ci first, as to NOT invalidate previous steps except for when package.json changes
+RUN mkdir -p /app/superset/assets
+COPY ./superset/assets/package* /app/superset/assets/
+RUN cd /app/superset/assets \
+        && npm ci
 
-# superset configuration/setup
-ADD superset-app/superset_admin.config /tmp/superset_admin.config
-RUN export LC_ALL=C.UTF-8 && fabmanager create-admin --app superset < /tmp/superset_admin.config
-RUN export LC_ALL=C.UTF-8 && superset db upgrade && superset init
-EXPOSE 8088/tcp
-CMD gunicorn -w 10 -k gevent --log-level debug --timeout 300 -b 0.0.0.0:8088 --limit-request-line 0 --limit-request-field_size 0  superset:app
+# Next, copy in the rest and let webpack do its thing
+COPY ./superset/assets /app/superset/assets
+# This is BY FAR the most expensive step (thanks Terser!)
+RUN cd /app/superset/assets \
+        && npm run build \
+        && rm -rf node_modules
+
+
+######################################################################
+# Final lean image...
+######################################################################
+ARG PY_VER=3.6.9
+FROM python:${PY_VER} AS lean
+
+ARG SUPERSET_MYSQL
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    FLASK_ENV=production \
+    FLASK_APP="superset.app:create_app()" \
+    PYTHONPATH="/app/pythonpath" \
+    SUPERSET_HOME="/app/superset_home" \
+    SUPERSET_PORT=8088 \
+    SUPERSET_MYSQL=${SUPERSET_MYSQL}
+
+RUN useradd --user-group --no-create-home --no-log-init --shell /bin/bash superset \
+        && mkdir -p ${SUPERSET_HOME} ${PYTHONPATH} \
+        && apt-get update -y \
+        && apt-get install -y --no-install-recommends \
+            build-essential \
+            default-libmysqlclient-dev \
+            libpq-dev \
+        && rm -rf /var/lib/apt/lists/*
+
+COPY --from=superset-py /usr/local/lib/python3.6/site-packages/ /usr/local/lib/python3.6/site-packages/
+# Copying site-packages doesn't move the CLIs, so let's copy them one by one
+COPY --from=superset-py /usr/local/bin/gunicorn /usr/local/bin/celery /usr/local/bin/flask /usr/bin/
+COPY --from=superset-node /app/superset/assets /app/superset/assets
+
+## Lastly, let's install superset itself
+COPY superset /app/superset
+COPY setup.py MANIFEST.in README.md /app/
+RUN cd /app \
+        && chown -R superset:superset * \
+        && pip install -e .
+
+COPY ./docker/docker-entrypoint.sh /usr/bin/
+
+WORKDIR /app
+
+USER superset
+
+HEALTHCHECK CMD ["curl", "-f", "http://localhost:8088/health"]
+
+EXPOSE ${SUPERSET_PORT}
+
+ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
+
+######################################################################
+# Dev image...
+######################################################################
+FROM lean AS dev
+
+COPY ./requirements-dev.txt ./docker/requirements-extra.txt /app/
+
+USER root
+RUN cd /app \
+    && pip install --no-cache -r requirements-dev.txt -r requirements-extra.txt
+USER superset

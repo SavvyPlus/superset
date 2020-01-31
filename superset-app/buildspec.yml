@@ -8,13 +8,13 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - REPOSITORY_URI=547051082101.dkr.ecr.ap-southeast-2.amazonaws.com/$IMAGE_REPO:$BRANCH-$IMAGE_BUILDID
+      - REPOSITORY_URI=000581985601.dkr.ecr.ap-southeast-2.amazonaws.com/$IMAGE_REPO:$BRANCH-$IMAGE_BUILDID
 
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -f superset-app/Dockerfile --build-arg branch=$BRANCH -t $IMAGE_REPO:$BRANCH .
+      - docker build -f superset-app/Dockerfile --build-arg SUPERSET_MYSQL=mysql://admin:SupersetRDS2020Oski@app-superset.cluster-cfye6soa6myy.ap-southeast-2.rds.amazonaws.com:3306/model_reporting branch=$BRANCH -t $IMAGE_REPO:$BRANCH .
       - docker tag $IMAGE_REPO:$BRANCH $REPOSITORY_URI     
 
 
