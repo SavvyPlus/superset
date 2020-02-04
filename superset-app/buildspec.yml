@@ -9,12 +9,14 @@ phases:
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - REPOSITORY_URI=000581985601.dkr.ecr.ap-southeast-2.amazonaws.com/$IMAGE_REPO:$BRANCH-$IMAGE_BUILDID
+      - echo Pulling code
+      - git clone -b $BRANCH --single-branch --depth=1 git://github.com/SavvyPlus/incubator-superset /tmp/savvy-superset && rm -rf /tmp/savvy-superset/.git
 
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -f superset-app/Dockerfile --build-arg branch=$BRANCH -t $IMAGE_REPO:$BRANCH .
+      - docker build -f /tmp/savvy-superset/Dockerfile --build-arg branch=$BRANCH -t $IMAGE_REPO:$BRANCH .
       - docker tag $IMAGE_REPO:$BRANCH $REPOSITORY_URI     
 
 
