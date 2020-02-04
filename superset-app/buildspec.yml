@@ -19,8 +19,6 @@ phases:
       - cd /tmp/savvy-superset/
       - docker build -f /tmp/savvy-superset/Dockerfile --build-arg branch=$BRANCH -t $IMAGE_REPO .
       - docker tag $IMAGE_REPO:latest $REPOSITORY_URI
-
-
       # - docker build -t $REPOSITORY_URI:latest .
       # - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
