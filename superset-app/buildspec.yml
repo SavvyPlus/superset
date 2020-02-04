@@ -17,8 +17,8 @@ phases:
       - echo Build started on `date`
       - echo Building the Docker image...
       - cd /tmp/savvy-superset/
-      - docker build -f /tmp/savvy-superset/Dockerfile --build-arg branch=$BRANCH -t $IMAGE_REPO:$BRANCH .
-      - docker tag $IMAGE_REPO:$BRANCH $REPOSITORY_URI     
+      - docker build -f /tmp/savvy-superset/Dockerfile --build-arg branch=$BRANCH -t latest .
+      - docker tag latest $REPOSITORY_URI
 
 
       # - docker build -t $REPOSITORY_URI:latest .
@@ -29,7 +29,7 @@ phases:
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI
       - cd -
-      - printf '{"tag":"%s","repository-uri":"%s"}' $IMAGE_REPO:$BRANCH $REPOSITORY_URI  > build.json
+      - printf '{"tag":"%s","repository-uri":"%s"}' latest $REPOSITORY_URI  > build.json
 
       # - docker push $REPOSITORY_URI:latest
       # - docker push $REPOSITORY_URI:$IMAGE_TAG
