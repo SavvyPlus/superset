@@ -90,7 +90,7 @@ RUN cd /app \
         && chown -R superset:superset * \
         && pip install -e .
 
-COPY ./docker/docker-entrypoint.sh /usr/bin/
+COPY ./docker-entrypoint.sh /usr/bin/
 
 WORKDIR /app
 
